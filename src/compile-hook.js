@@ -1,9 +1,13 @@
+const log = require('loglevel');
 const compile = require('./compile');
 
 let compiling = false;
 
 const compileHook = (code, filename) => {
-  if (compiling) return code;
+  if (compiling) {
+    log.info('[require-extension-vue info] compiling is already in progress, returning `code` as is');
+    return code;
+  }
 
   try {
     compiling = true;

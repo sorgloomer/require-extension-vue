@@ -10,6 +10,7 @@
   },
   "mocha": {
     "spec": "test/**/*.spec.js",
+    "timeout": 4000,
     "color": true
   },
   "husky": {
@@ -56,9 +57,17 @@
     "lint-staged": "^9.5.0",
     "mocha": "^6.2.2",
     "prettier": "^1.19.1",
-    "sinon": "^7.5.0"
+    "sinon": "^7.5.0",
+    "vue-template-compiler": "^2.6.10"
   },
   "dependencies": {
-    "pirates": "^4.0.1"
+    "@vue/component-compiler-utils": "^3.0.2",
+    "fs-extra": "^8.1.0",
+    "loglevel": "^1.6.6",
+    "pirates": "^4.0.1",
+    "ramda": "^0.26.1"
+  },
+  "peerDependencies": {
+    "vue-template-compiler": "2.x"
   }
 }

@@ -41,7 +41,10 @@ module.exports = {
     "unicorn/prevent-abbreviations": "off",
 
     // mocha
-    "mocha/no-global-tests": "off"
+    "mocha/no-global-tests": "off",
+    "mocha/no-mocha-arrows": "off",
+    "mocha/no-top-level-hooks": "off",
+    "mocha/no-skipped-tests": "off"
   },
 
   "overrides": [
@@ -51,6 +54,10 @@ module.exports = {
       "env": {
         "mocha": true
       },
+
+      "globals": {
+        'expect': 'readonly'
+      }
     }
   ]
 };
