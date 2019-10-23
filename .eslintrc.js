@@ -39,6 +39,7 @@ module.exports = {
 
     // unicorn
     "unicorn/prevent-abbreviations": "off",
+    "unicorn/no-process-exit": "off",
 
     // mocha
     "mocha/no-global-tests": "off",

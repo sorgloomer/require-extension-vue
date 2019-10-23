@@ -2,6 +2,9 @@ const path = require('path');
 const fse = require('fs-extra');
 const { parse, compileTemplate } = require('@vue/component-compiler-utils');
 const log = require('loglevel');
+const { getDefaultBabelOptions, getBabelOptions, isBabelEnabled, isBabelConfigured } = require('./config');
+const { nthArg } = require('./utils');
+
 const REGEX_FUNCTIONAL_COMPONENT = /functional\s*:\s*true/;
 const REGEX_RENDER_FUNCTION = /render\s*:?\s*\(/;
 
@@ -59,14 +62,60 @@ const compile = (source, filename) => {
   // script
   let scriptContent = '';
   if (descriptor.script) {
-    scriptContent = getBlockContent(descriptor.script, filename);
-    log.debug(`[require-extension-vue debug] script content ${scriptContent}`);
+    const transform = isBabelEnabled() ? babelTransform : nullTransform;
+    scriptContent = transform(filename, getBlockContent(descriptor.script, filename));
+    log.debug(`[require-extension-vue debug] ${isBabelEnabled() ? 'transformed' : ''} script content ${scriptContent}`);
   }
 
   const result = [scriptContent, compiledTemplateContent].join('\n').trim() + '\n';
   log.debug(`[require-extension-vue debug] compiled vue file ${result}`);
   log.info(`[require-extension-vue info] finished compiling: '${filename}'`);
   return result;
+};
+
+/**
+ * @type {(filename: string, scriptContent: string) => string}
+ */
+const nullTransform = nthArg(1);
+
+/**
+ * @type {(filename: string, scriptContent: string) => string}
+ */
+const babelTransform = (filename, scriptContent) => {
+  log.info('[require-extension-vue info] start transpiling script content');
+  log.debug(`[require-extension-vue debug] provided babel options: ${JSON.stringify(getBabelOptions(), null, 2)}`);
+  const { transformSync, loadPartialConfig } = loadBabel();
+  const babelFilename = `${filename}.js`;
+  // merge in base options and resolve all the plugins and presets relative to this file
+  let partialConfig = loadPartialConfig({
+    // primary
+    caller: {
+      name: 'require-extension-vue'
+    },
+
+    filename: babelFilename,
+    ast: false,
+
+    // source map
+    // sourceMaps: opts.sourceMaps === undefined ? 'both' : opts.sourceMaps,
+    // sourceRoot: path.dirname(babelFilename),
+    // todo
+    // ...deepClone(transformOpts),
+
+    ...(isBabelConfigured() ? getBabelOptions() : {})
+  });
+
+  // note: that .babelrc works mystically, it is not returned by partialConfig
+  //  so here we might overwrite it with our defaults but that doesn't happen
+  //  for some reason and the thing still works ¯\_(ツ)_/¯
+  let opts = partialConfig.hasFilesystemConfig()
+    ? partialConfig.options
+    : { ...partialConfig.options, ...getDefaultBabelOptions() };
+
+  log.debug(`[require-extension-vue debug] actual babel options: ${JSON.stringify(opts)}`);
+  const transformedContent = transformSync(scriptContent, opts);
+  log.info('[require-extension-vue info] finished transpiling script content');
+  return transformedContent.code;
 };
 
 const getCompiledTemplate = ({ source, filename, compiler, isFunctional } = {}) => {
@@ -129,6 +178,16 @@ const isFunctionalComponent = descriptor => {
     (descriptor.template && descriptor.template.attrs.functional) ||
       (descriptor.script && REGEX_FUNCTIONAL_COMPONENT.test(descriptor.script.content))
   );
+};
+
+const loadBabel = () => {
+  let babel = null;
+  try {
+    babel = require('@babel/core');
+  } catch (error) {
+    throw new Error(`[require-extension-vue: error] @babel/core must be installed if you want to use it.`);
+  }
+  return babel;
 };
 
 const loadVueTemplateCompiler = () => {

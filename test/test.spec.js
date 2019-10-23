@@ -1,7 +1,8 @@
+const path = require('path');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const log = require('loglevel');
-const { isFunction } = require('./utils');
+const { isFunction } = require('../src/utils');
 require('..');
 
 describe('', () => {
@@ -120,6 +121,69 @@ describe('', () => {
       '[require-extension-vue: compiler error] Component template should contain exactly one root element. If you are using v-if on multiple elements, use v-else-if to chain them instead.'
     );
     expectComponent(component, { name: 'ErrorMultiRoot' });
+  });
+});
+
+it('should parse a simple vue file with es module export when `babel` option is true and no babel config', function() {
+  require('..')({ babel: true });
+  const component = require('./fixtures/simple-export-babel-no-ext-conf').default;
+  expectComponent(component, {
+    name: 'SimpleExportBabelNoExtConf',
+    renderContains: 'Simple Export Babel No Ext Conf'
+  });
+});
+
+it('should parse a vue file with external es module export when `babel` option is true and no babel config', function() {
+  require('..')({ babel: true });
+  const component = require('./fixtures/external-script-babel-no-ext-conf').default;
+  expectComponent(component, {
+    name: 'ExternalScriptBabelNoExtConf',
+    renderContains: 'External Script Babel No Ext Conf'
+  });
+});
+
+it('should parse a simple vue file with es module export when `babel` option configured', function() {
+  require('..')({
+    babel: {
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            targets: 'current node'
+          }
+        ]
+      ]
+    }
+  });
+  const component = require('./fixtures/simple-export-babel-no-ext-conf').default;
+  expectComponent(component, {
+    name: 'SimpleExportBabelNoExtConf',
+    renderContains: 'Simple Export Babel No Ext Conf'
+  });
+});
+
+it('should parse a simple vue file with es module export when .babelrc is used', function() {
+  require('..')({
+    babel: {
+      cwd: path.resolve(__dirname, 'fixtures', 'simple-export-babel-babelrc'),
+      babelrc: true
+    }
+  });
+  const component = require('./fixtures/simple-export-babel-babelrc').default;
+  expectComponent(component, { name: 'SimpleExportBabelBabelrc', renderContains: 'Simple Export Babel Babelrc' });
+});
+
+it('should parse a simple vue file with es module export when babel.config.js is used', function() {
+  require('..')({
+    babel: {
+      cwd: path.resolve(__dirname, 'fixtures', 'simple-export-babel-babel-config-js'),
+      babelrc: false
+    }
+  });
+  const component = require('./fixtures/simple-export-babel-babel-config-js').default;
+  expectComponent(component, {
+    name: 'SimpleExportBabelBabelConfigJs',
+    renderContains: 'Simple Export Babel Babel Config Js'
   });
 });
 
