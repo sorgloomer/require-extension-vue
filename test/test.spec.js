@@ -2,17 +2,13 @@ const path = require('path');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const log = require('loglevel');
-const { isFunction } = require('../src/utils');
+const { expectComponent, expectFunctionalComponent } = require('./common');
 require('..');
 
 describe('', () => {
   beforeEach(() => {
     sinon.spy(log, 'error');
     sinon.spy(log, 'warn');
-  });
-
-  afterEach(() => {
-    sinon.restore();
   });
 
   it('should parse an empty vue file', function() {
@@ -186,20 +182,3 @@ it('should parse a simple vue file with es module export when babel.config.js is
     renderContains: 'Simple Export Babel Babel Config Js'
   });
 });
-
-const expectFunctionalComponent = (value, details = {}) => {
-  expectComponent(value, { ...details, functional: true });
-};
-
-const expectComponent = (value, details = {}) => {
-  value = value || {};
-  const { name, renderContains = '', _compiled = true, functional = false, staticRenderFns = [] } = details;
-  // todo
-  // console.log('######## component keys/values:', Object.entries(value).map(([key, value]) => `${key}: ${value}`));
-  expect(value.name).to.equal(name, `component.name should be set`);
-  expect(isFunction(value.render)).to.equal(true, `component.render should be a function`);
-  expect(String(value.render)).to.include(renderContains, 'component.render should include text');
-  expect(value._compiled).to.equal(_compiled, `component._compiled should be set to true`);
-  expect(value.functional).to.equal(functional, `component.functional should be set`);
-  expect(value.staticRenderFns).to.eql(staticRenderFns, `component.staticRenderFns should be set`);
-};

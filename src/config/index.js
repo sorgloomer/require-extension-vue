@@ -5,6 +5,12 @@ const log = require('loglevel');
 const optionsSchema = {
   type: 'object',
   properties: {
+    permanentCache: {
+      default: false,
+      description: 'Use permanent caching of compiled files.',
+      type: 'boolean'
+    },
+
     babel: {
       default: 'false',
       description:
@@ -16,6 +22,7 @@ const optionsSchema = {
       oneOf: [{ type: 'boolean' }, { type: 'object' }]
     }
   },
+
   additionalProperties: false
 };
 
@@ -23,6 +30,7 @@ const optionsSchema = {
  * @type {() => Object<string, any>}
  */
 const getDefaultConfig = () => ({
+  permanentCache: false,
   babel: false
 });
 
@@ -41,6 +49,11 @@ const getDefaultBabelOptions = () => ({
 
   exclude: /node_modules/
 });
+
+/**
+ * @type {(config: Object<string, any>) => boolean}
+ */
+const isPermanentCacheEnabled = u.propEqTrue('permanentCache');
 
 /**
  * @type {(config: Object<string, any>) => boolean}
@@ -84,5 +97,6 @@ exports = module.exports = {
   getDefaultBabelOptions,
   isBabelConfigured: () => isBabelConfigured(_config),
   isBabelEnabled: () => isBabelEnabled(_config),
+  isPermanentCacheEnabled: () => isPermanentCacheEnabled(_config),
   initConfig: options => (_config = initConfig(options))
 };
