@@ -68,7 +68,9 @@
     "fs-extra": "^8.1.0",
     "loglevel": "^1.6.6",
     "pirates": "^4.0.1",
-    "ramda": "^0.26.1"
+    "ramda": "^0.26.1",
+    "source-map": "^0.7.3",
+    "source-map-support": "^0.5.16"
   },
   "peerDependencies": {
     "@babel/core": "7.x",

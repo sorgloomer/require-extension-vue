@@ -1,5 +1,6 @@
 const { addHook } = require('pirates');
 const log = require('loglevel');
+const sourceMapSupport = require('source-map-support');
 const compileHook = require('./compile-hook');
 const { initConfig } = require('./config');
 
@@ -20,6 +21,12 @@ const register = options => {
   log.info('[require-extension-vue info]: installing hook');
   piratesRevert = addHook(compileHook, { ext: VUE_EXTENSION, ignoreNodeModules: false });
 };
+
+sourceMapSupport.install({
+  handleUncaughtExceptions: false,
+  environment: 'node',
+  hookRequire: true
+});
 
 register();
 

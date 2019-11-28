@@ -2,8 +2,10 @@ const path = require('path');
 const fse = require('fs-extra');
 const { parse, compileTemplate } = require('@vue/component-compiler-utils');
 const log = require('loglevel');
+const merge = require('merge-source-map');
+const convert = require('convert-source-map');
+const { SourceMapGenerator } = require('source-map');
 const { getDefaultBabelOptions, getBabelOptions, isBabelEnabled, isBabelConfigured } = require('./config');
-const { nthArg } = require('./utils');
 
 const REGEX_FUNCTIONAL_COMPONENT = /functional\s*:\s*true/;
 const REGEX_RENDER_FUNCTION = /render\s*:?\s*\(/;
@@ -20,8 +22,7 @@ const compile = (source, filename) => {
     source,
     filename,
     compiler,
-    // todo: enable when the time comes
-    needMap: false
+    needMap: true
   });
 
   log.debug(`[require-extension-vue debug] parsed vue file descriptor: ${JSON.stringify(descriptor, null, 2)}`);
@@ -31,17 +32,65 @@ const compile = (source, filename) => {
   }
   descriptor.errors.forEach(error => log.error(`[require-extension-vue: parser error] ${error}`));
 
-  const isFunctional = isFunctionalComponent(descriptor);
-  const hasRenderFn = hasRenderFunction(descriptor);
-
   log.info(`[require-extension-vue info] ${descriptor.template ? 'has' : 'has no'} template block`);
   log.info(`[require-extension-vue info] ${descriptor.script ? 'has' : 'has no'} script block`);
   log.info(`[require-extension-vue info] ${descriptor.style ? 'has' : 'has no'} style block`);
+
+  const compiledTemplateContent = processTemplateBlock(filename, descriptor, compiler);
+  const [scriptContent, scriptMap] = processScriptBlock(filename, descriptor.script);
+  const result = [scriptContent, compiledTemplateContent, `\n${scriptMap}`].join('\n').trim() + '\n';
+
+  log.debug(`[require-extension-vue debug] compiled vue file ${result}`);
+  log.info(`[require-extension-vue info] finished compiling: '${filename}'`);
+
+  return result;
+};
+
+/**
+ * @type {(filename: string, scriptDescriptor: SFCBlock) => [string, string]}
+ */
+const processScriptBlock = (filename, scriptDescriptor) => {
+  let scriptContent = '';
+  let scriptMap = '';
+  if (!scriptDescriptor) return [scriptContent, scriptMap];
+
+  log.info(`[require-extension-vue info] babel is ${isBabelEnabled() ? 'enabled' : 'not enabled'}`);
+
+  const transform = isBabelEnabled() ? babelTransform : nullTransform;
+  const transformed = transform(filename, getBlockContent(scriptDescriptor, filename));
+  scriptContent = transformed.code;
+
+  log.debug(`[require-extension-vue debug] transformed script ${JSON.stringify(transformed, null, 2)}`);
+
+  let vueMap = scriptDescriptor.map || null;
+  const transformMap = transformed.map || null;
+
+  log.info(`[require-extension-vue info] parsed script block ${vueMap ? 'has' : 'has no'} source map`);
+  log.info(`[require-extension-vue info] transformed script ${transformMap ? 'has' : 'has no'} source map`);
+
+  if (!vueMap && scriptDescriptor.src) {
+    const externalScriptFile = path.join(path.dirname(filename), scriptDescriptor.src);
+    log.info(`[require-extension-vue info] generating source map for external script file: ${externalScriptFile}`);
+    vueMap = convert.fromJSON(new SourceMapGenerator({ file: externalScriptFile }).toString()).toObject();
+  }
+
+  let sourceMap = vueMap && transformMap ? merge(vueMap, transformMap) : transformMap || vueMap;
+  scriptMap = sourceMap ? convert.fromObject(sourceMap).toComment() : '';
+
+  return [scriptContent, scriptMap];
+};
+
+/**
+ * @type {(filename: string, descriptor: SFCDescriptor, compiler: Object<string, any>) => [string, string]}
+ */
+const processTemplateBlock = (filename, descriptor, compiler) => {
+  let templateContent = '';
+  const isFunctional = isFunctionalComponent(descriptor);
+  const hasRenderFn = hasRenderFunction(descriptor);
+
   log.info(`[require-extension-vue info] ${isFunctional ? 'functional' : 'regular'} component`);
   log.info(`[require-extension-vue info] ${hasRenderFn ? 'has' : 'has no'} render function`);
 
-  // template
-  let templateContent = '';
   if (descriptor.template && !hasRenderFn) {
     templateContent = getBlockContent(descriptor.template, filename);
     log.debug(`[require-extension-vue debug] template content ${templateContent}`);
@@ -58,25 +107,16 @@ const compile = (source, filename) => {
         .trim();
 
   log.debug(`[require-extension-vue debug] compiled template content ${compiledTemplateContent}`);
-
-  // script
-  let scriptContent = '';
-  if (descriptor.script) {
-    const transform = isBabelEnabled() ? babelTransform : nullTransform;
-    scriptContent = transform(filename, getBlockContent(descriptor.script, filename));
-    log.debug(`[require-extension-vue debug] ${isBabelEnabled() ? 'transformed' : ''} script content ${scriptContent}`);
-  }
-
-  const result = [scriptContent, compiledTemplateContent].join('\n').trim() + '\n';
-  log.debug(`[require-extension-vue debug] compiled vue file ${result}`);
-  log.info(`[require-extension-vue info] finished compiling: '${filename}'`);
-  return result;
+  return compiledTemplateContent;
 };
 
 /**
  * @type {(filename: string, scriptContent: string) => string}
  */
-const nullTransform = nthArg(1);
+const nullTransform = (filename, scriptContent) => ({
+  code: scriptContent,
+  map: null
+});
 
 /**
  * @type {(filename: string, scriptContent: string) => string}
@@ -95,12 +135,7 @@ const babelTransform = (filename, scriptContent) => {
 
     filename: babelFilename,
     ast: false,
-
-    // source map
-    // sourceMaps: opts.sourceMaps === undefined ? 'both' : opts.sourceMaps,
-    // sourceRoot: path.dirname(babelFilename),
-    // todo
-    // ...deepClone(transformOpts),
+    sourceMaps: true,
 
     ...(isBabelConfigured() ? getBabelOptions() : {})
   });
@@ -113,9 +148,8 @@ const babelTransform = (filename, scriptContent) => {
     : { ...partialConfig.options, ...getDefaultBabelOptions() };
 
   log.debug(`[require-extension-vue debug] actual babel options: ${JSON.stringify(opts)}`);
-  const transformedContent = transformSync(scriptContent, opts);
   log.info('[require-extension-vue info] finished transpiling script content');
-  return transformedContent.code;
+  return transformSync(scriptContent, opts);
 };
 
 const getCompiledTemplate = ({ source, filename, compiler, isFunctional } = {}) => {
