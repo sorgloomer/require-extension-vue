@@ -1,0 +1,64 @@
+{
+  "name": "@prepair/require-extension-vue",
+  "version": "0.0.0",
+  "description": "simple vue file support for node mainly for testing purposes",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint src",
+    "test": "mocha",
+    "test:watch": "npm run test -- --watch"
+  },
+  "mocha": {
+    "spec": "test/**/*.spec.js",
+    "color": true
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "npm test"
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "git add",
+      "eslint"
+    ]
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prepair/require-extension-vue.git"
+  },
+  "author": "Zoltan Feher <zf_common@outlook.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/prepair/require-extension-vue/issues"
+  },
+  "homepage": "https://github.com/prepair/require-extension-vue#readme",
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "eslint": "^6.7.2",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-config-semistandard": "^15.0.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-mocha": "^6.2.2",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "eslint-plugin-unicorn": "^14.0.1",
+    "eslint-plugin-vue": "^6.0.1",
+    "husky": "^3.1.0",
+    "lint-staged": "^9.5.0",
+    "mocha": "^6.2.2",
+    "prettier": "^1.19.1",
+    "sinon": "^7.5.0"
+  },
+  "dependencies": {
+    "pirates": "^4.0.1"
+  }
+}

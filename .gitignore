@@ -1,0 +1,14 @@
+.DS_Store
+.idea
+.vscode
+.tmp
+bin
+node_modules
+
+.env
+*.sublime-project
+*.sublime-workspace
+.sublime-gulp.cache
+*.zip
+jsconfig.json
+npm-debug.log
