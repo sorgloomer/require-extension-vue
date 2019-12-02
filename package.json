@@ -1,12 +1,14 @@
 {
   "name": "@prepair/require-extension-vue",
   "version": "0.0.0",
-  "description": "simple vue file support for node mainly for testing purposes",
+  "description": "Simple vue file support for node. Mainly for testing purposes.",
   "main": "src/index.js",
   "scripts": {
     "lint": "eslint src",
     "test": "mocha",
-    "test:watch": "npm run test -- --watch"
+    "test:watch": "npm run test -- --watch",
+    "prerelease": "npm run lint && npm run test",
+    "release": "git checkout master && git pull --rebase origin master && standard-version && git push --follow-tags origin master && npm publish --access=public"
   },
   "mocha": {
     "file": "test/setup.js",
@@ -59,6 +61,7 @@
     "mocha": "^6.2.2",
     "prettier": "^1.19.1",
     "sinon": "^7.5.0",
+    "standard-version": "^7.0.1",
     "vue-template-compiler": "^2.6.10"
   },
   "dependencies": {
