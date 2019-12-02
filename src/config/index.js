@@ -7,6 +7,7 @@ const optionsSchema = require('./options-schema');
  * @type {() => Object<string, any>}
  */
 const getDefaultConfig = () => ({
+  logLevel: 'warn',
   permanentCache: false,
   babel: false,
   noLogParserErrors: false,
@@ -120,6 +121,13 @@ const isBabelConfigured = u.compose(u.isNotEmptyObject, u.prop('babel'));
 const getBabelOptions = u.ifElse(isBabelConfigured, u.prop('babel'), u.always({}));
 
 /**
+ * @type {(config: Object<string, any>) => void}
+ */
+const initLogging = config => {
+  log.setDefaultLevel(process.env.REQ_EXT_VUE_LOG_LEVEL || config.logLevel);
+};
+
+/**
  * @type {(options: Object<string, any>, config: Object<string, any>) => Object<string, any>}
  */
 const initConfig = options => {
@@ -148,6 +156,7 @@ exports = module.exports = {
   isBabelEnabled: () => isBabelEnabled(_config),
   isPermanentCacheEnabled: () => isPermanentCacheEnabled(_config),
   initConfig: options => (_config = initConfig(options)),
+  initLogging: () => initLogging(_config),
   isParserErrorsOutputEnabled: () => isParserErrorsOutputEnabled(_config),
   isTemplateCompilerErrorsOutputEnabled: () => isTemplateCompilerErrorsOutputEnabled(_config),
   isTemplateCompilerTipsOutputEnabled: () => isTemplateCompilerTipsOutputEnabled(_config),

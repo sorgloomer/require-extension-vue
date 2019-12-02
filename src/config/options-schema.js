@@ -1,6 +1,13 @@
 const optionsSchema = {
   type: 'object',
   properties: {
+    logLevel: {
+      default: 'warn',
+      description: 'logging level: trace|debug|info|warn|error|silent',
+      type: 'string',
+      enum: ['trace', 'debug', 'info', 'warn', 'error', 'silent']
+    },
+
     permanentCache: {
       default: false,
       description: 'Use permanent caching of compiled files.',
