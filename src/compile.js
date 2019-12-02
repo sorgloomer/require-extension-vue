@@ -5,7 +5,15 @@ const log = require('loglevel');
 const merge = require('merge-source-map');
 const convert = require('convert-source-map');
 const { SourceMapGenerator } = require('source-map');
-const { getDefaultBabelOptions, getBabelOptions, isBabelEnabled, isBabelConfigured } = require('./config');
+const {
+  getDefaultBabelOptions,
+  getBabelOptions,
+  isBabelEnabled,
+  isBabelConfigured,
+  isParserErrorsOutputEnabled,
+  isTemplateCompilerErrorsOutputEnabled,
+  isTemplateCompilerTipsOutputEnabled
+} = require('./config');
 
 const REGEX_FUNCTIONAL_COMPONENT = /functional\s*:\s*true/;
 const REGEX_RENDER_FUNCTION = /render\s*:?\s*\(/;
@@ -17,7 +25,6 @@ const COMPONENT_OPTIONS =
 const compile = (source, filename) => {
   log.info(`[require-extension-vue info] start compiling: '${filename}'`);
   const compiler = loadVueTemplateCompiler();
-
   const descriptor = parse({
     source,
     filename,
@@ -27,10 +34,7 @@ const compile = (source, filename) => {
 
   log.debug(`[require-extension-vue debug] parsed vue file descriptor: ${JSON.stringify(descriptor, null, 2)}`);
 
-  if (descriptor.errors.length > 0) {
-    log.error(`[require-extension-vue] parser errors in file: ${filename}`);
-  }
-  descriptor.errors.forEach(error => log.error(`[require-extension-vue: parser error] ${error}`));
+  logParserErrors(filename, descriptor.errors);
 
   log.info(`[require-extension-vue info] ${descriptor.template ? 'has' : 'has no'} template block`);
   log.info(`[require-extension-vue info] ${descriptor.script ? 'has' : 'has no'} script block`);
@@ -164,15 +168,8 @@ const getCompiledTemplate = ({ source, filename, compiler, isFunctional } = {}) 
 
   log.debug(`[require-extension-vue debug] compiled template descriptor ${JSON.stringify(compiled, null, 2)}`);
 
-  if (compiled.errors.length > 0) {
-    log.error(`[require-extension-vue] compiler errors in file: ${filename}`);
-  }
-  compiled.errors.forEach(error => log.error(`[require-extension-vue: compiler error] ${error}`));
-
-  if (compiled.tips.length > 0) {
-    log.warn(`[require-extension-vue] compiler tips in file: ${filename}`);
-  }
-  compiled.tips.forEach(tip => log.warn(`[require-extension-vue: compiler tip] ${tip}`));
+  logTemplateCompilerErrors(filename, compiled.errors);
+  logTemplateCompilerTips(filename, compiled.tips);
 
   return [
     compiled.code,
@@ -212,6 +209,52 @@ const isFunctionalComponent = descriptor => {
     (descriptor.template && descriptor.template.attrs.functional) ||
       (descriptor.script && REGEX_FUNCTIONAL_COMPONENT.test(descriptor.script.content))
   );
+};
+
+/**
+ * @type {(filename: string, errors: string[]) => void}
+ */
+const logParserErrors = (filename, errors) => {
+  log.info(
+    `[require-extension-vue info] parser errors output is ${isParserErrorsOutputEnabled() ? 'enabled' : 'disabled'}`
+  );
+  if (!isParserErrorsOutputEnabled()) return;
+  if (errors.length > 0) {
+    log.error(`[require-extension-vue] parser errors in file: ${filename}`);
+  }
+  errors.forEach(error => log.error(`[require-extension-vue: parser error] ${error}`));
+};
+
+/**
+ * @type {(filename: string, errors: string[]) => void}
+ */
+const logTemplateCompilerErrors = (filename, errors) => {
+  log.info(
+    `[require-extension-vue info] template compiler errors output is ${
+      isTemplateCompilerErrorsOutputEnabled() ? 'enabled' : 'disabled'
+    }`
+  );
+  if (!isTemplateCompilerErrorsOutputEnabled()) return;
+  if (errors.length > 0) {
+    log.error(`[require-extension-vue] compiler errors in file: ${filename}`);
+  }
+  errors.forEach(error => log.error(`[require-extension-vue: compiler error] ${error}`));
+};
+
+/**
+ * @type {(filename: string, tips: string[]) => void}
+ */
+const logTemplateCompilerTips = (filename, tips) => {
+  log.info(
+    `[require-extension-vue info] template compiler tips output is ${
+      isTemplateCompilerTipsOutputEnabled() ? 'enabled' : 'disabled'
+    }`
+  );
+  if (!isTemplateCompilerTipsOutputEnabled()) return;
+  if (tips.length > 0) {
+    log.warn(`[require-extension-vue] compiler tips in file: ${filename}`);
+  }
+  tips.forEach(tip => log.warn(`[require-extension-vue: compiler tip] ${tip}`));
 };
 
 const loadBabel = () => {

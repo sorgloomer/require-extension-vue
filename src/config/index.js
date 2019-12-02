@@ -51,6 +51,27 @@ const getDefaultBabelOptions = () => ({
 });
 
 /**
+ * @type {() => boolean}
+ */
+const isTemplateCompilerTipsOutputEnabled = () => {
+  return !process.env.REQ_EXT_VUE_SILENCE_TEMPLATE_COMPILER_TIPS;
+};
+
+/**
+ * @type {() => boolean}
+ */
+const isTemplateCompilerErrorsOutputEnabled = () => {
+  return !process.env.REQ_EXT_VUE_SILENCE_TEMPLATE_COMPILER_ERRORS;
+};
+
+/**
+ * @type {() => boolean}
+ */
+const isParserErrorsOutputEnabled = () => {
+  return !process.env.REQ_EXT_VUE_SILENCE_PARSER_ERRORS;
+};
+
+/**
  * @type {(config: Object<string, any>) => boolean}
  */
 const isPermanentCacheEnabled = u.propEqTrue('permanentCache');
@@ -98,5 +119,8 @@ exports = module.exports = {
   isBabelConfigured: () => isBabelConfigured(_config),
   isBabelEnabled: () => isBabelEnabled(_config),
   isPermanentCacheEnabled: () => isPermanentCacheEnabled(_config),
-  initConfig: options => (_config = initConfig(options))
+  initConfig: options => (_config = initConfig(options)),
+  isParserErrorsOutputEnabled,
+  isTemplateCompilerErrorsOutputEnabled,
+  isTemplateCompilerTipsOutputEnabled
 };
