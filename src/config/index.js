@@ -1,37 +1,33 @@
 const u = require('../utils');
 const Ajv = require('ajv');
 const log = require('loglevel');
-
-const optionsSchema = {
-  type: 'object',
-  properties: {
-    permanentCache: {
-      default: false,
-      description: 'Use permanent caching of compiled files.',
-      type: 'boolean'
-    },
-
-    babel: {
-      default: 'false',
-      description:
-        'Use babel for script block transpilation. `true` will use your project' +
-        ' babel config if found, if not it will use a default setting with `babel-preset-env`' +
-        ' to set to `current node`. Using an object you can provide additional babel options,' +
-        ' will merge with your babel config if found, if not the provided options will' +
-        ' be used as is.',
-      oneOf: [{ type: 'boolean' }, { type: 'object' }]
-    }
-  },
-
-  additionalProperties: false
-};
+const optionsSchema = require('./options-schema');
 
 /**
  * @type {() => Object<string, any>}
  */
 const getDefaultConfig = () => ({
   permanentCache: false,
-  babel: false
+  babel: false,
+  noLogParserErrors: false,
+  noLogTemplateCompilerErrors: false,
+  noLogTemplateCompilerTips: false,
+
+  parser: {
+    errors: {
+      exclude: []
+    }
+  },
+
+  templateCompiler: {
+    errors: {
+      exclude: []
+    },
+
+    tips: {
+      exclude: []
+    }
+  }
 });
 
 /**
@@ -51,24 +47,56 @@ const getDefaultBabelOptions = () => ({
 });
 
 /**
- * @type {() => boolean}
+ * @type {config: Object<string, any>, () => boolean}
  */
-const isTemplateCompilerTipsOutputEnabled = () => {
-  return !process.env.REQ_EXT_VUE_SILENCE_TEMPLATE_COMPILER_TIPS;
+const isParserErrorsOutputEnabled = config => {
+  return !config.noLogParserErrors && !process.env.REQ_EXT_VUE_SILENCE_PARSER_ERRORS;
 };
 
 /**
- * @type {() => boolean}
+ * @type {(config: Object<string, any>, ) => boolean}
  */
-const isTemplateCompilerErrorsOutputEnabled = () => {
-  return !process.env.REQ_EXT_VUE_SILENCE_TEMPLATE_COMPILER_ERRORS;
+const isTemplateCompilerErrorsOutputEnabled = config => {
+  return !config.noLogTemplateCompilerErrors && !process.env.REQ_EXT_VUE_SILENCE_TEMPLATE_COMPILER_ERRORS;
 };
 
 /**
- * @type {() => boolean}
+ * @type {(config: Object<string, any>, ) => boolean}
  */
-const isParserErrorsOutputEnabled = () => {
-  return !process.env.REQ_EXT_VUE_SILENCE_PARSER_ERRORS;
+const isTemplateCompilerTipsOutputEnabled = config => {
+  return !config.noLogTemplateCompilerTips && !process.env.REQ_EXT_VUE_SILENCE_TEMPLATE_COMPILER_TIPS;
+};
+
+/**
+ * @type {(config: Object<string, any>, error: string) => boolean}
+ */
+const parserErrorMessageFilter = (config, error) => {
+  return messageFilter(config.parser.errors.exclude, error);
+};
+
+/**
+ * @type {(config: Object<string, any>, error: string) => boolean}
+ */
+const templateCompilerErrorMessageFilter = (config, error) => {
+  return messageFilter(config.templateCompiler.errors.exclude, error);
+};
+
+/**
+ * @type {(config: Object<string, any>, tip: string) => boolean}
+ */
+const templateCompilerTipMessageFilter = (config, tip) => {
+  return messageFilter(config.templateCompiler.tips.exclude, tip);
+};
+
+/**
+ * @type {(excludes: (string | RegExp)[], message: string) => boolean}
+ */
+const messageFilter = (excludes, message) => {
+  return !excludes.some(exclude => {
+    if (u.isString(exclude)) return message === exclude;
+    if (u.isRegExp(exclude)) return exclude.test(message);
+    return false;
+  });
 };
 
 /**
@@ -120,7 +148,10 @@ exports = module.exports = {
   isBabelEnabled: () => isBabelEnabled(_config),
   isPermanentCacheEnabled: () => isPermanentCacheEnabled(_config),
   initConfig: options => (_config = initConfig(options)),
-  isParserErrorsOutputEnabled,
-  isTemplateCompilerErrorsOutputEnabled,
-  isTemplateCompilerTipsOutputEnabled
+  isParserErrorsOutputEnabled: () => isParserErrorsOutputEnabled(_config),
+  isTemplateCompilerErrorsOutputEnabled: () => isTemplateCompilerErrorsOutputEnabled(_config),
+  isTemplateCompilerTipsOutputEnabled: () => isTemplateCompilerTipsOutputEnabled(_config),
+  parserErrorMessageFilter: error => parserErrorMessageFilter(_config, error),
+  templateCompilerErrorMessageFilter: error => templateCompilerErrorMessageFilter(_config, error),
+  templateCompilerTipMessageFilter: tip => templateCompilerTipMessageFilter(_config, tip)
 };

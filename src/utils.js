@@ -24,6 +24,16 @@ const isOfType = R.curry((type, value) => Object.prototype.toString.call(value) 
 /**
  * @type {(value: any) => boolean}
  */
+const isRegExp = isOfType('[object RegExp]');
+
+/**
+ * @type {(value: any) => boolean}
+ */
+const isString = isOfType('[object String]');
+
+/**
+ * @type {(value: any) => boolean}
+ */
 const isBoolean = isOfType('[object Boolean]');
 
 /**
@@ -77,6 +87,8 @@ exports = module.exports = {
   isNotEmptyObject,
   isNotObject,
   isObject,
+  isRegExp,
+  isString,
   nullary,
   propEqTrue,
   propEqFalse

@@ -12,7 +12,10 @@ const {
   isBabelConfigured,
   isParserErrorsOutputEnabled,
   isTemplateCompilerErrorsOutputEnabled,
-  isTemplateCompilerTipsOutputEnabled
+  isTemplateCompilerTipsOutputEnabled,
+  parserErrorMessageFilter,
+  templateCompilerErrorMessageFilter,
+  templateCompilerTipMessageFilter
 } = require('./config');
 
 const REGEX_FUNCTIONAL_COMPONENT = /functional\s*:\s*true/;
@@ -219,10 +222,14 @@ const logParserErrors = (filename, errors) => {
     `[require-extension-vue info] parser errors output is ${isParserErrorsOutputEnabled() ? 'enabled' : 'disabled'}`
   );
   if (!isParserErrorsOutputEnabled()) return;
+
+  errors = errors.map(error => `[require-extension-vue: parser error] ${error}`).filter(parserErrorMessageFilter);
+
   if (errors.length > 0) {
     log.error(`[require-extension-vue] parser errors in file: ${filename}`);
   }
-  errors.forEach(error => log.error(`[require-extension-vue: parser error] ${error}`));
+
+  errors.forEach(error => log.error(error));
 };
 
 /**
@@ -235,10 +242,16 @@ const logTemplateCompilerErrors = (filename, errors) => {
     }`
   );
   if (!isTemplateCompilerErrorsOutputEnabled()) return;
+
+  errors = errors
+    .map(error => `[require-extension-vue: compiler error] ${error}`)
+    .filter(templateCompilerErrorMessageFilter);
+
   if (errors.length > 0) {
     log.error(`[require-extension-vue] compiler errors in file: ${filename}`);
   }
-  errors.forEach(error => log.error(`[require-extension-vue: compiler error] ${error}`));
+
+  errors.forEach(error => log.error(error));
 };
 
 /**
@@ -251,10 +264,14 @@ const logTemplateCompilerTips = (filename, tips) => {
     }`
   );
   if (!isTemplateCompilerTipsOutputEnabled()) return;
+
+  tips = tips.map(tip => `[require-extension-vue: compiler tip] ${tip}`).filter(templateCompilerTipMessageFilter);
+
   if (tips.length > 0) {
     log.warn(`[require-extension-vue] compiler tips in file: ${filename}`);
   }
-  tips.forEach(tip => log.warn(`[require-extension-vue: compiler tip] ${tip}`));
+
+  tips.forEach(tip => log.warn(tip));
 };
 
 const loadBabel = () => {
