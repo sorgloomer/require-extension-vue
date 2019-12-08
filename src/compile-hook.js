@@ -20,9 +20,9 @@ const compileHook = (code, filename) => {
 
   try {
     compiling = true;
-    const compiledCode = compile(code, filename);
+    const { code: compiledCode, vueMetadata } = compile(code, filename);
     if (isPermanentCacheEnabled()) {
-      setCachedFile(filename, compiledCode);
+      setCachedFile(vueMetadata, compiledCode);
     }
     return compiledCode;
   } finally {

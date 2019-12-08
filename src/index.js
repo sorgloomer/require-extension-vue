@@ -2,7 +2,8 @@ const { addHook } = require('pirates');
 const log = require('loglevel');
 const sourceMapSupport = require('source-map-support');
 const compileHook = require('./compile-hook');
-const { initConfig, initLogging } = require('./config');
+const { initConfig, initLogging, isPermanentCacheEnabled } = require('./config');
+const { initialize: initializeCache } = require('./cache');
 
 const VUE_EXTENSION = '.vue';
 
@@ -10,8 +11,9 @@ let piratesRevert = null;
 
 const register = options => {
   initConfig(options);
+  if (isPermanentCacheEnabled()) initializeCache();
   initLogging();
-  log.debug(`[require-extension-vue debug] provided options: ${JSON.stringify(options)}`);
+  log.debug(`[require-extension-vue debug] provided options: ${JSON.stringify(options, null, 2)}`);
   if (piratesRevert) {
     log.info('[require-extension-vue info]: removing installed hook');
     piratesRevert();

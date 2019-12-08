@@ -44,14 +44,21 @@ const compile = (source, filename) => {
   log.info(`[require-extension-vue info] ${descriptor.script ? 'has' : 'has no'} script block`);
   log.info(`[require-extension-vue info] ${descriptor.style ? 'has' : 'has no'} style block`);
 
-  const compiledTemplateContent = processTemplateBlock(filename, descriptor, compiler);
-  const [scriptContent, scriptMap] = processScriptBlock(filename, descriptor.script);
+  const [compiledTemplateContent, externalTemplatePath] = processTemplateBlock(filename, descriptor, compiler);
+  const [scriptContent, scriptMap, externalScriptPath] = processScriptBlock(filename, descriptor.script);
   const result = [scriptContent, compiledTemplateContent, `\n${scriptMap}`].join('\n').trim() + '\n';
 
   log.debug(`[require-extension-vue debug] compiled vue file ${result}`);
   log.info(`[require-extension-vue info] finished compiling: '${filename}'`);
 
-  return result;
+  return {
+    code: result,
+    vueMetadata: {
+      filePath: filename,
+      externalScriptPath,
+      externalTemplatePath
+    }
+  };
 };
 
 /**
@@ -60,12 +67,15 @@ const compile = (source, filename) => {
 const processScriptBlock = (filename, scriptDescriptor) => {
   let scriptContent = '';
   let scriptMap = '';
-  if (!scriptDescriptor) return [scriptContent, scriptMap];
+  let externalScriptPath = null;
+  let content = '';
+  if (!scriptDescriptor) return [scriptContent, scriptMap, externalScriptPath];
 
   log.info(`[require-extension-vue info] babel is ${isBabelEnabled() ? 'enabled' : 'not enabled'}`);
 
+  [content, externalScriptPath] = getBlockContent(scriptDescriptor, filename);
   const transform = isBabelEnabled() ? babelTransform : nullTransform;
-  const transformed = transform(filename, getBlockContent(scriptDescriptor, filename));
+  const transformed = transform(filename, content);
   scriptContent = transformed.code;
 
   log.debug(`[require-extension-vue debug] transformed script ${JSON.stringify(transformed, null, 2)}`);
@@ -77,15 +87,14 @@ const processScriptBlock = (filename, scriptDescriptor) => {
   log.info(`[require-extension-vue info] transformed script ${transformMap ? 'has' : 'has no'} source map`);
 
   if (!vueMap && scriptDescriptor.src) {
-    const externalScriptFile = path.join(path.dirname(filename), scriptDescriptor.src);
-    log.info(`[require-extension-vue info] generating source map for external script file: ${externalScriptFile}`);
-    vueMap = convert.fromJSON(new SourceMapGenerator({ file: externalScriptFile }).toString()).toObject();
+    log.info(`[require-extension-vue info] generating source map for external script file: ${externalScriptPath}`);
+    vueMap = convert.fromJSON(new SourceMapGenerator({ file: externalScriptPath }).toString()).toObject();
   }
 
   let sourceMap = vueMap && transformMap ? merge(vueMap, transformMap) : transformMap || vueMap;
   scriptMap = sourceMap ? convert.fromObject(sourceMap).toComment() : '';
 
-  return [scriptContent, scriptMap];
+  return [scriptContent, scriptMap, externalScriptPath];
 };
 
 /**
@@ -93,6 +102,7 @@ const processScriptBlock = (filename, scriptDescriptor) => {
  */
 const processTemplateBlock = (filename, descriptor, compiler) => {
   let templateContent = '';
+  let externalTemplatePath = null;
   const isFunctional = isFunctionalComponent(descriptor);
   const hasRenderFn = hasRenderFunction(descriptor);
 
@@ -100,7 +110,7 @@ const processTemplateBlock = (filename, descriptor, compiler) => {
   log.info(`[require-extension-vue info] ${hasRenderFn ? 'has' : 'has no'} render function`);
 
   if (descriptor.template && !hasRenderFn) {
-    templateContent = getBlockContent(descriptor.template, filename);
+    [templateContent, externalTemplatePath] = getBlockContent(descriptor.template, filename);
     log.debug(`[require-extension-vue debug] template content ${templateContent}`);
   }
 
@@ -115,7 +125,7 @@ const processTemplateBlock = (filename, descriptor, compiler) => {
         .trim();
 
   log.debug(`[require-extension-vue debug] compiled template content ${compiledTemplateContent}`);
-  return compiledTemplateContent;
+  return [compiledTemplateContent, externalTemplatePath];
 };
 
 /**
@@ -133,7 +143,6 @@ const babelTransform = (filename, scriptContent) => {
   log.info('[require-extension-vue info] start transpiling script content');
   log.debug(`[require-extension-vue debug] provided babel options: ${JSON.stringify(getBabelOptions(), null, 2)}`);
   const { transformSync, loadPartialConfig } = loadBabel();
-  const babelFilename = `${filename}.js`;
   // merge in base options and resolve all the plugins and presets relative to this file
   let partialConfig = loadPartialConfig({
     // primary
@@ -141,7 +150,7 @@ const babelTransform = (filename, scriptContent) => {
       name: 'require-extension-vue'
     },
 
-    filename: babelFilename,
+    filename,
     ast: false,
     sourceMaps: true,
 
@@ -155,7 +164,7 @@ const babelTransform = (filename, scriptContent) => {
     ? partialConfig.options
     : { ...partialConfig.options, ...getDefaultBabelOptions() };
 
-  log.debug(`[require-extension-vue debug] actual babel options: ${JSON.stringify(opts)}`);
+  log.debug(`[require-extension-vue debug] actual babel options: ${JSON.stringify(opts, null, 2)}`);
   log.info('[require-extension-vue info] finished transpiling script content');
   return transformSync(scriptContent, opts);
 };
@@ -201,7 +210,10 @@ const getBlockContent = (block, filename) => {
       block.src ? `external file '${path.join(path.dirname(filename), block.src)}'` : 'inline block'
     }`
   );
-  return block.src ? fse.readFileSync(path.join(path.dirname(filename), block.src), ENCODING_UTF8) : block.content;
+
+  let blockPath = block.src ? path.join(path.dirname(filename), block.src) : null;
+  let content = blockPath ? fse.readFileSync(blockPath, ENCODING_UTF8) : block.content;
+  return [content, blockPath];
 };
 
 /**
