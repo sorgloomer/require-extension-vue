@@ -42,6 +42,13 @@
     "url": "https://github.com/prepair/require-extension-vue/issues"
   },
   "homepage": "https://github.com/prepair/require-extension-vue#readme",
+  "keywords": [
+    "vue",
+    "require",
+    "extension",
+    "hook",
+    "node"
+  ],
   "devDependencies": {
     "chai": "^4.2.0",
     "eslint": "^6.7.2",
