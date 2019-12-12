@@ -71,30 +71,50 @@ const processScriptBlock = (filename, scriptDescriptor) => {
   let content = '';
   if (!scriptDescriptor) return [scriptContent, scriptMap, externalScriptPath];
 
+  let vueMap = scriptDescriptor.map || null;
+  [content, externalScriptPath] = getBlockContent(scriptDescriptor, filename);
+
+  if (externalScriptPath) {
+    filename = externalScriptPath;
+  }
+
+  if (!isBabelEnabled() && externalScriptPath) {
+    // need to generate a basic 1-1 source map so stack trace will correctly point
+    //  to external script at the correct line at least
+    vueMap = generateBasicSelfSourceMap(filename, content);
+  }
+
+  log.info(`[require-extension-vue info] parsed script block ${vueMap ? 'has' : 'has no'} source map`);
   log.info(`[require-extension-vue info] babel is ${isBabelEnabled() ? 'enabled' : 'not enabled'}`);
 
-  [content, externalScriptPath] = getBlockContent(scriptDescriptor, filename);
   const transform = isBabelEnabled() ? babelTransform : nullTransform;
   const transformed = transform(filename, content);
   scriptContent = transformed.code;
-
-  log.debug(`[require-extension-vue debug] transformed script ${JSON.stringify(transformed, null, 2)}`);
-
-  let vueMap = scriptDescriptor.map || null;
   const transformMap = transformed.map || null;
 
-  log.info(`[require-extension-vue info] parsed script block ${vueMap ? 'has' : 'has no'} source map`);
+  log.debug(`[require-extension-vue debug] transformed script ${JSON.stringify(transformed, null, 2)}`);
   log.info(`[require-extension-vue info] transformed script ${transformMap ? 'has' : 'has no'} source map`);
-
-  if (!vueMap && scriptDescriptor.src) {
-    log.info(`[require-extension-vue info] generating source map for external script file: ${externalScriptPath}`);
-    vueMap = convert.fromJSON(new SourceMapGenerator({ file: externalScriptPath }).toString()).toObject();
-  }
 
   let sourceMap = vueMap && transformMap ? merge(vueMap, transformMap) : transformMap || vueMap;
   scriptMap = sourceMap ? convert.fromObject(sourceMap).toComment() : '';
-
   return [scriptContent, scriptMap, externalScriptPath];
+};
+
+/**
+ * @type {(filename: string, content: string) => Object<string, any>}
+ */
+const generateBasicSelfSourceMap = (filename, content) => {
+  filename = path.basename(filename);
+  const map = new SourceMapGenerator({ file: filename });
+  for (let i = 1; i <= content.split('\n').length; i++) {
+    map.addMapping({
+      source: filename,
+      generated: { line: i, column: 0 },
+      original: { line: i, column: 0 }
+    });
+  }
+  map.setSourceContent(filename, content);
+  return convert.fromJSON(map.toString()).toObject();
 };
 
 /**
