@@ -17,6 +17,7 @@ const {
   templateCompilerErrorMessageFilter,
   templateCompilerTipMessageFilter
 } = require('./config');
+const u = require('./utils');
 
 const REGEX_FUNCTIONAL_COMPONENT = /functional\s*:\s*true/;
 const REGEX_RENDER_FUNCTION = /render\s*:?\s*\(/;
@@ -169,7 +170,13 @@ const getCompiledTemplate = ({ source, filename, compiler, isFunctional } = {}) 
     isFunctional
   });
 
-  log.debug(`[require-extension-vue debug] compiled template descriptor ${JSON.stringify(compiled, null, 2)}`);
+  log.debug(
+    `[require-extension-vue debug] compiled template descriptor ${JSON.stringify(
+      u.pick(['code', 'source', 'tips', 'errors'], compiled),
+      null,
+      2
+    )}`
+  );
 
   logTemplateCompilerErrors(filename, compiled.errors);
   logTemplateCompilerTips(filename, compiled.tips);
