@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.1](https://github.com/prepair/require-extension-vue/compare/v1.0.0...v1.0.1) (2019-12-13)
+
+
+### Bug Fixes
+
+* **permanent cache:** external scripts and templates should be considered in cache validation to avoid staled cached vue file usage ([d42d641](https://github.com/prepair/require-extension-vue/commit/d42d64189f818fce95c6d3525b35f764f66a8211))
+* **source-map:** generate source map from external script if referenced from vue file ([724a475](https://github.com/prepair/require-extension-vue/commit/724a475d730d1ef5ea87cbb012333639b648809e))
+
 ## 1.0.0 (2019-12-03)
 
 
