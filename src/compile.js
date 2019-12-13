@@ -198,7 +198,7 @@ const getCompiledTemplate = ({ source, filename, compiler, isFunctional } = {}) 
 const getBlockContent = (block, filename) => {
   log.info(
     `[require-extension-vue info] get ${block.type} content from ${
-      block.src ? "external file 'path.join(path.dirname(filename), block.src)'" : 'inline block'
+      block.src ? `external file '${path.join(path.dirname(filename), block.src)}'` : 'inline block'
     }`
   );
   return block.src ? fse.readFileSync(path.join(path.dirname(filename), block.src), ENCODING_UTF8) : block.content;
