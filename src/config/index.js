@@ -16,19 +16,19 @@ const getDefaultConfig = () => ({
 
   parser: {
     errors: {
-      exclude: []
-    }
+      exclude: [],
+    },
   },
 
   templateCompiler: {
     errors: {
-      exclude: []
+      exclude: [],
     },
 
     tips: {
-      exclude: []
-    }
-  }
+      exclude: [],
+    },
+  },
 });
 
 /**
@@ -39,33 +39,41 @@ const getDefaultBabelOptions = () => ({
     [
       '@babel/preset-env',
       {
-        targets: 'current node'
-      }
-    ]
+        targets: 'current node',
+      },
+    ],
   ],
 
-  exclude: /node_modules/
+  exclude: /node_modules/,
 });
 
 /**
  * @type {config: Object<string, any>, () => boolean}
  */
-const isParserErrorsOutputEnabled = config => {
-  return !config.noLogParserErrors && !process.env.REQ_EXT_VUE_SILENCE_PARSER_ERRORS;
+const isParserErrorsOutputEnabled = (config) => {
+  return (
+    !config.noLogParserErrors && !process.env.REQ_EXT_VUE_SILENCE_PARSER_ERRORS
+  );
 };
 
 /**
  * @type {(config: Object<string, any>, ) => boolean}
  */
-const isTemplateCompilerErrorsOutputEnabled = config => {
-  return !config.noLogTemplateCompilerErrors && !process.env.REQ_EXT_VUE_SILENCE_TEMPLATE_COMPILER_ERRORS;
+const isTemplateCompilerErrorsOutputEnabled = (config) => {
+  return (
+    !config.noLogTemplateCompilerErrors &&
+    !process.env.REQ_EXT_VUE_SILENCE_TEMPLATE_COMPILER_ERRORS
+  );
 };
 
 /**
  * @type {(config: Object<string, any>, ) => boolean}
  */
-const isTemplateCompilerTipsOutputEnabled = config => {
-  return !config.noLogTemplateCompilerTips && !process.env.REQ_EXT_VUE_SILENCE_TEMPLATE_COMPILER_TIPS;
+const isTemplateCompilerTipsOutputEnabled = (config) => {
+  return (
+    !config.noLogTemplateCompilerTips &&
+    !process.env.REQ_EXT_VUE_SILENCE_TEMPLATE_COMPILER_TIPS
+  );
 };
 
 /**
@@ -93,7 +101,7 @@ const templateCompilerTipMessageFilter = (config, tip) => {
  * @type {(excludes: (string | RegExp)[], message: string) => boolean}
  */
 const messageFilter = (excludes, message) => {
-  return !excludes.some(exclude => {
+  return !excludes.some((exclude) => {
     if (u.isString(exclude)) return message === exclude;
     if (u.isRegExp(exclude)) return exclude.test(message);
     return false;
@@ -108,7 +116,10 @@ const isPermanentCacheEnabled = u.propEqTrue('permanentCache');
 /**
  * @type {(config: Object<string, any>) => boolean}
  */
-const isBabelEnabled = u.compose(u.either(u.equals(true), u.isNotEmptyObject), u.prop('babel'));
+const isBabelEnabled = u.compose(
+  u.either(u.equals(true), u.isNotEmptyObject),
+  u.prop('babel')
+);
 
 /**
  * @type {(config: Object<string, any>) => boolean}
@@ -118,19 +129,23 @@ const isBabelConfigured = u.compose(u.isNotEmptyObject, u.prop('babel'));
 /**
  * @type {(config: Object<string, any>) => Object<string, any>}
  */
-const getBabelOptions = u.ifElse(isBabelConfigured, u.prop('babel'), u.always({}));
+const getBabelOptions = u.ifElse(
+  isBabelConfigured,
+  u.prop('babel'),
+  u.always({})
+);
 
 /**
  * @type {(config: Object<string, any>) => void}
  */
-const initLogging = config => {
+const initLogging = (config) => {
   log.setDefaultLevel(process.env.REQ_EXT_VUE_LOG_LEVEL || config.logLevel);
 };
 
 /**
  * @type {(options: Object<string, any>, config: Object<string, any>) => Object<string, any>}
  */
-const initConfig = options => {
+const initConfig = (options) => {
   if (options) verifyOptions(options);
   return u.mergeDeepRight(getDefaultConfig(), options || {});
 };
@@ -138,11 +153,14 @@ const initConfig = options => {
 /**
  * @type {(options: Object<string, any>) => void}
  */
-const verifyOptions = options => {
+const verifyOptions = (options) => {
   const ajv = new Ajv();
   const isValid = ajv.validate(optionsSchema, options);
   if (!isValid) {
-    log.error('[require-extension-vue: error] Invalid options are provided:\n\n', ajv.errors);
+    log.error(
+      '[require-extension-vue: error] Invalid options are provided:\n\n',
+      ajv.errors
+    );
     process.exit(1);
   }
 };
@@ -155,12 +173,16 @@ exports = module.exports = {
   isBabelConfigured: () => isBabelConfigured(_config),
   isBabelEnabled: () => isBabelEnabled(_config),
   isPermanentCacheEnabled: () => isPermanentCacheEnabled(_config),
-  initConfig: options => (_config = initConfig(options)),
+  initConfig: (options) => (_config = initConfig(options)),
   initLogging: () => initLogging(_config),
   isParserErrorsOutputEnabled: () => isParserErrorsOutputEnabled(_config),
-  isTemplateCompilerErrorsOutputEnabled: () => isTemplateCompilerErrorsOutputEnabled(_config),
-  isTemplateCompilerTipsOutputEnabled: () => isTemplateCompilerTipsOutputEnabled(_config),
-  parserErrorMessageFilter: error => parserErrorMessageFilter(_config, error),
-  templateCompilerErrorMessageFilter: error => templateCompilerErrorMessageFilter(_config, error),
-  templateCompilerTipMessageFilter: tip => templateCompilerTipMessageFilter(_config, tip)
+  isTemplateCompilerErrorsOutputEnabled: () =>
+    isTemplateCompilerErrorsOutputEnabled(_config),
+  isTemplateCompilerTipsOutputEnabled: () =>
+    isTemplateCompilerTipsOutputEnabled(_config),
+  parserErrorMessageFilter: (error) => parserErrorMessageFilter(_config, error),
+  templateCompilerErrorMessageFilter: (error) =>
+    templateCompilerErrorMessageFilter(_config, error),
+  templateCompilerTipMessageFilter: (tip) =>
+    templateCompilerTipMessageFilter(_config, tip),
 };

@@ -5,13 +5,13 @@ const optionsSchema = {
       default: 'warn',
       description: 'logging level: trace|debug|info|warn|error|silent',
       type: 'string',
-      enum: ['trace', 'debug', 'info', 'warn', 'error', 'silent']
+      enum: ['trace', 'debug', 'info', 'warn', 'error', 'silent'],
     },
 
     permanentCache: {
       default: false,
       description: 'Use permanent caching of compiled files.',
-      type: 'boolean'
+      type: 'boolean',
     },
 
     babel: {
@@ -22,25 +22,25 @@ const optionsSchema = {
         ' to set to `current node`. Using an object you can provide additional babel options,' +
         ' will merge with your babel config if found, if not the provided options will' +
         ' be used as is.',
-      oneOf: [{ type: 'boolean' }, { type: 'object' }]
+      oneOf: [{ type: 'boolean' }, { type: 'object' }],
     },
 
     noLogParserErrors: {
       default: false,
       description: '',
-      type: 'boolean'
+      type: 'boolean',
     },
 
     noLogTemplateCompilerErrors: {
       default: false,
       description: '',
-      type: 'boolean'
+      type: 'boolean',
     },
 
     noLogTemplateCompilerTips: {
       default: false,
       description: '',
-      type: 'boolean'
+      type: 'boolean',
     },
 
     parser: {
@@ -60,16 +60,16 @@ const optionsSchema = {
               description: '',
               type: 'array',
               items: {
-                oneOf: [{ type: 'string' }, { type: 'object' }]
-              }
-            }
+                oneOf: [{ type: 'string' }, { type: 'object' }],
+              },
+            },
           },
 
-          additionalProperties: false
-        }
+          additionalProperties: false,
+        },
       },
 
-      additionalProperties: false
+      additionalProperties: false,
     },
 
     templateCompiler: {
@@ -89,12 +89,12 @@ const optionsSchema = {
               description: '',
               type: 'array',
               items: {
-                oneOf: [{ type: 'string' }, { type: 'object' }]
-              }
-            }
+                oneOf: [{ type: 'string' }, { type: 'object' }],
+              },
+            },
           },
 
-          additionalProperties: false
+          additionalProperties: false,
         },
 
         tips: {
@@ -108,20 +108,20 @@ const optionsSchema = {
               description: '',
               type: 'array',
               items: {
-                oneOf: [{ type: 'string' }, { type: 'object' }]
-              }
-            }
+                oneOf: [{ type: 'string' }, { type: 'object' }],
+              },
+            },
           },
 
-          additionalProperties: false
-        }
+          additionalProperties: false,
+        },
       },
 
-      additionalProperties: false
-    }
+      additionalProperties: false,
+    },
   },
 
-  additionalProperties: false
+  additionalProperties: false,
 };
 
 exports = module.exports = optionsSchema;

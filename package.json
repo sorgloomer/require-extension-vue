@@ -10,6 +10,19 @@
     "prerelease": "npm run lint && npm run test",
     "release": "git checkout master && git pull --rebase origin master && standard-version && git push --follow-tags origin master && npm publish --access=public"
   },
+  "prettier": {
+    "printWidth": 80,
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": true,
+    "quoteProps": "as-needed",
+    "trailingComma": "es5",
+    "bracketSpacing": true,
+    "arrowParens": "always",
+    "vueIndentScriptAndStyle": false,
+    "endOfLine": "lf"
+  },
   "mocha": {
     "file": "test/setup.js",
     "spec": "test/**/*.spec.js",
@@ -25,6 +38,7 @@
   "lint-staged": {
     "*.js": [
       "eslint --fix",
+      "prettier",
       "eslint"
     ]
   },
@@ -50,22 +64,21 @@
   ],
   "devDependencies": {
     "chai": "^4.2.0",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.10.0",
-    "eslint-config-semistandard": "^15.0.0",
-    "eslint-config-standard": "^14.1.0",
-    "eslint-plugin-import": "^2.20.1",
-    "eslint-plugin-mocha": "^6.3.0",
-    "eslint-plugin-node": "^11.0.0",
-    "eslint-plugin-prettier": "^3.1.2",
+    "eslint": "^7.15.0",
+    "eslint-config-prettier": "^7.0.0",
+    "eslint-config-semistandard": "^15.0.1",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-mocha": "^8.0.0",
+    "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
-    "eslint-plugin-unicorn": "^17.2.0",
-    "eslint-plugin-vue": "^6.2.2",
+    "eslint-plugin-standard": "^5.0.0",
+    "eslint-plugin-unicorn": "^23.0.0",
+    "eslint-plugin-vue": "^7.2.0",
     "husky": "^4.3.5",
     "lint-staged": "^10.5.3",
     "mocha": "^8.2.1",
-    "prettier": "^1.19.1",
+    "prettier": "^2.2.1",
     "sinon": "^9.2.1",
     "standard-version": "^9.0.0",
     "vue-template-compiler": "^2.6.12"

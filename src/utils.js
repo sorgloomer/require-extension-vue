@@ -19,7 +19,9 @@ const propEqFalse = R.propEq(R.__, false, R.__);
 /**
  * @type {(type: string, value: any) => boolean}
  */
-const isOfType = R.curry((type, value) => Object.prototype.toString.call(value) === type);
+const isOfType = R.curry(
+  (type, value) => Object.prototype.toString.call(value) === type
+);
 
 /**
  * @type {(value: any) => boolean}
@@ -91,5 +93,5 @@ exports = module.exports = {
   isString,
   nullary,
   propEqTrue,
-  propEqFalse
+  propEqFalse,
 };
