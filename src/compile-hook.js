@@ -24,7 +24,7 @@ const compileHook = (code, filename) => {
     return cachedFile;
   }
   if (compiling) {
-    log.info(
+    log.warn(
       '[require-extension-vue info] compiling is already in progress, returning `code` as is'
     );
     return code;
