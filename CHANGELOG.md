@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.4](https://github.com/prepair/require-extension-vue/compare/v1.0.3...v1.0.4) (2020-12-10)
+
+
+### Bug Fixes
+
+* fix case when cache metadata external script or template not exists anymore ([0e71ab1](https://github.com/prepair/require-extension-vue/commit/0e71ab10bd1ee67907605595333da9384a583cf7))
+
 ### [1.0.3](https://github.com/prepair/require-extension-vue/compare/v1.0.2...v1.0.3) (2020-03-14)
 
 ### [1.0.2](https://github.com/prepair/require-extension-vue/compare/v1.0.1...v1.0.2) (2020-03-14)
