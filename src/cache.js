@@ -148,13 +148,11 @@ const toCwdRelativeMetadataPath = (filePath) =>
  * @type {(vueMetada: Object<string, any>) => string}
  */
 const getCacheMetadataValue = (vueMetadata) => {
-  const vueMtimeMs = fse.statSync(vueMetadata.filePath).mtimeMs;
-  const extScriptMtimeMs = vueMetadata.externalScriptPath
-    ? fse.statSync(path.resolve(vueMetadata.externalScriptPath)).mtimeMs
-    : null;
-  const extTemplateMtimeMs = vueMetadata.externalTemplatePath
-    ? fse.statSync(path.resolve(vueMetadata.externalTemplatePath)).mtimeMs
-    : null;
+  // note: vueMetadata.filePath always exists for sure that is what triggered the
+  //  hook in the first place
+  const vueMtimeMs = mtimeMs(vueMetadata.filePath);
+  const extScriptMtimeMs = mtimeMs(vueMetadata.externalScriptPath);
+  const extTemplateMtimeMs = mtimeMs(vueMetadata.externalTemplatePath);
 
   return {
     mtimeMs: vueMtimeMs,
@@ -173,6 +171,13 @@ const getCacheMetadataValue = (vueMetadata) => {
         }
       : null,
   };
+};
+
+const mtimeMs = (filePath) => {
+  if (!filePath) return null;
+  const _path = path.resolve(filePath);
+  if (!fse.existsSync(_path)) return null;
+  return fse.statSync(_path).mtimeMs;
 };
 
 /**
