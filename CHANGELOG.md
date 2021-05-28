@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/prepair/require-extension-vue/compare/v1.0.4...v2.0.0) (2021-05-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* **package.json:** upgrading fs-extra to latest raises the minimum
+supported Node.js version to 12
+
+* **package.json:** update dependencies ([9daeb3e](https://github.com/prepair/require-extension-vue/commit/9daeb3e0a84513982ffef9491122b4f24e4a1cad))
+
 ### [1.0.4](https://github.com/prepair/require-extension-vue/compare/v1.0.3...v1.0.4) (2020-12-10)
 
 
