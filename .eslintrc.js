@@ -25,9 +25,6 @@ module.exports = {
     'plugin:unicorn/recommended',
     'plugin:vue/recommended',
     'prettier',
-    'prettier/standard',
-    'prettier/unicorn',
-    'prettier/vue',
   ],
 
   rules: {
@@ -38,9 +35,12 @@ module.exports = {
     'import/no-cycle': 'error',
 
     // unicorn
+    'unicorn/no-array-callback-reference': 'off',
+    'unicorn/no-array-for-each': 'off',
     'unicorn/no-fn-reference-in-iterator': 'off',
     'unicorn/no-null': 'off',
     'unicorn/no-process-exit': 'off',
+    'unicorn/prefer-module': 'off',
     'unicorn/prevent-abbreviations': 'off',
 
     // mocha
