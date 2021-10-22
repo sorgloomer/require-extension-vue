@@ -92,7 +92,7 @@ const compile = (source, filename) => {
 /**
  * @type {(filename: string, scriptDescriptor: SFCBlock) => [string, string]}
  */
-const processScriptBlock = (filename, scriptDescriptor) => {
+const processScriptBlock = (vueFilename, scriptDescriptor) => {
   let scriptContent = '';
   let scriptMap = '';
   let externalScriptPath = null;
@@ -100,16 +100,19 @@ const processScriptBlock = (filename, scriptDescriptor) => {
   if (!scriptDescriptor) return [scriptContent, scriptMap, externalScriptPath];
 
   let vueMap = scriptDescriptor.map || null;
-  [content, externalScriptPath] = getBlockContent(scriptDescriptor, filename);
+  [content, externalScriptPath] = getBlockContent(
+    scriptDescriptor,
+    vueFilename
+  );
 
-  if (externalScriptPath) {
-    filename = externalScriptPath;
-  }
+  const lang = scriptDescriptor.lang || 'js';
+  const scriptFilename =
+    externalScriptPath || vueFilename.replace('.vue', `_vue_script.${lang}`);
 
   if (!isBabelEnabled() && externalScriptPath) {
     // need to generate a basic 1-1 source map so stack trace will correctly point
     //  to external script at the correct line at least
-    vueMap = generateBasicSelfSourceMap(filename, content);
+    vueMap = generateBasicSelfSourceMap(scriptFilename, content);
   }
 
   log.info(
@@ -124,7 +127,7 @@ const processScriptBlock = (filename, scriptDescriptor) => {
   );
 
   const transform = isBabelEnabled() ? babelTransform : nullTransform;
-  const transformed = transform(filename, content);
+  const transformed = transform(scriptFilename, content);
   scriptContent = transformed.code;
   const transformMap = transformed.map || null;
 
@@ -311,21 +314,21 @@ const getCompiledTemplate = ({
  * @type {(block: SFCBlock, filename: string) => string}
  */
 const getBlockContent = (block, filename) => {
+  const externalPath = block.src
+    ? path.join(path.dirname(filename), block.src)
+    : null;
+
   log.info(
     `[require-extension-vue info] get ${block.type} content from ${
-      block.src
-        ? `external file '${path.join(path.dirname(filename), block.src)}'`
-        : 'inline block'
+      externalPath ? `external file '${externalPath}'` : 'inline block'
     }`
   );
 
-  const blockPath = block.src
-    ? path.join(path.dirname(filename), block.src)
-    : null;
-  const content = blockPath
-    ? fse.readFileSync(blockPath, ENCODING_UTF8)
+  const content = externalPath
+    ? fse.readFileSync(externalPath, ENCODING_UTF8)
     : block.content;
-  return [content, blockPath];
+
+  return [content, externalPath];
 };
 
 /**
