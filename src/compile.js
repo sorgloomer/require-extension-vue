@@ -92,7 +92,7 @@ const compile = (source, filename) => {
 /**
  * @type {(filename: string, scriptDescriptor: SFCBlock) => [string, string]}
  */
-const processScriptBlock = (vueFilename, scriptDescriptor) => {
+const processScriptBlock = (filename, scriptDescriptor) => {
   let scriptContent = '';
   let scriptMap = '';
   let externalScriptPath = null;
@@ -100,19 +100,16 @@ const processScriptBlock = (vueFilename, scriptDescriptor) => {
   if (!scriptDescriptor) return [scriptContent, scriptMap, externalScriptPath];
 
   let vueMap = scriptDescriptor.map || null;
-  [content, externalScriptPath] = getBlockContent(
-    scriptDescriptor,
-    vueFilename
-  );
+  [content, externalScriptPath] = getBlockContent(scriptDescriptor, filename);
 
-  const lang = scriptDescriptor.lang || 'js';
-  const scriptFilename =
-    externalScriptPath || vueFilename.replace('.vue', `_vue_script.${lang}`);
+  if (externalScriptPath) {
+    filename = externalScriptPath;
+  }
 
   if (!isBabelEnabled() && externalScriptPath) {
     // need to generate a basic 1-1 source map so stack trace will correctly point
     //  to external script at the correct line at least
-    vueMap = generateBasicSelfSourceMap(scriptFilename, content);
+    vueMap = generateBasicSelfSourceMap(filename, content);
   }
 
   log.info(
@@ -127,7 +124,7 @@ const processScriptBlock = (vueFilename, scriptDescriptor) => {
   );
 
   const transform = isBabelEnabled() ? babelTransform : nullTransform;
-  const transformed = transform(scriptFilename, content);
+  const transformed = transform(filename, content);
   scriptContent = transformed.code;
   const transformMap = transformed.map || null;
 
