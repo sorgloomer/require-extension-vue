@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.3](https://github.com/prepair/require-extension-vue/compare/v2.0.2...v2.0.3) (2021-11-05)
+
+
+### Bug Fixes
+
+* revert: use virtual script.js/.ts filename for babel transform ([82af506](https://github.com/prepair/require-extension-vue/commit/82af506ff710c0d3fa63f68789f101c7ca1ad03a))
+
 ### [2.0.2](https://github.com/prepair/require-extension-vue/compare/v2.0.1...v2.0.2) (2021-10-22)
 
 
