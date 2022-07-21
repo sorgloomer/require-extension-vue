@@ -1,5 +1,5 @@
 const fse = require('fs-extra');
-const path = require('path');
+const path = require('node:path');
 const log = require('loglevel');
 const _findCacheDir = require('find-cache-dir');
 const u = require('./utils');

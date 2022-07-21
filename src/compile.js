@@ -1,4 +1,4 @@
-const path = require('path');
+const path = require('node:path');
 const fse = require('fs-extra');
 const { parse, compileTemplate } = require('@vue/component-compiler-utils');
 const log = require('loglevel');

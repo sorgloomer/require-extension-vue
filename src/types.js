@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-empty-file */
 /**
  * @typedef {Object} SFCDescriptor
  * @property {SFCBlock | null} template
