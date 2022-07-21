@@ -94,8 +94,15 @@
     "@babel/preset-env": "7.x",
     "vue-template-compiler": "2.x"
   },
-  "optionalDependencies": {
-    "@babel/core": "^7.14.3",
-    "@babel/preset-env": "^7.14.2"
+  "peerDependenciesMeta": {
+    "@babel/core": {
+      "optional": true
+    },
+    "@babel/preset-env": {
+      "optional": true
+    },
+    "vue-template-compiler": {
+      "optional": false
+    }
   }
 }
