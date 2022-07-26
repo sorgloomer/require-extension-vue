@@ -16,7 +16,11 @@ let piratesRevert = null;
 const register = (options) => {
   initConfig(options);
   if (isPermanentCacheEnabled()) initializeCache();
-  initLogging();
+  // note: setLevel inside loglevel completely replaces all exposed functions when
+  //  called. this makes stubbing/spying kinda impossible/hard to maintain
+  if (process.env.NODE_ENV !== 'test') {
+    initLogging();
+  }
   log.debug(
     `[require-extension-vue debug] provided options: ${JSON.stringify(
       options,

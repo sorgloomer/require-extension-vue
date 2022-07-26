@@ -8,6 +8,7 @@ const optionsSchema = require('./options-schema');
  */
 const getDefaultConfig = () => ({
   logLevel: 'warn',
+  emitEsmodule: false,
   permanentCache: false,
   babel: false,
   noLogParserErrors: false,
@@ -127,6 +128,11 @@ const isBabelEnabled = u.compose(
 const isBabelConfigured = u.compose(u.isNotEmptyObject, u.prop('babel'));
 
 /**
+ * @type {(config: Object<string, any>) => boolean}
+ */
+const emitEsmodule = u.compose(u.equals(true), u.prop('emitEsmodule'));
+
+/**
  * @type {(config: Object<string, any>) => Object<string, any>}
  */
 const getBabelOptions = u.ifElse(
@@ -170,6 +176,7 @@ let _config = getDefaultConfig();
 exports = module.exports = {
   getBabelOptions: () => getBabelOptions(_config),
   getDefaultBabelOptions,
+  emitEsmodule: () => emitEsmodule(_config),
   isBabelConfigured: () => isBabelConfigured(_config),
   isBabelEnabled: () => isBabelEnabled(_config),
   isPermanentCacheEnabled: () => isPermanentCacheEnabled(_config),
