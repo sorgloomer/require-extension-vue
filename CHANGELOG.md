@@ -2,21 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### [2.0.3](https://github.com/prepair/require-extension-vue/compare/v2.0.2...v2.0.3) (2021-11-05)
+## [3.0.0](https://github.com/prepair/require-extension-vue/compare/v2.0.3...v3.0.0) (2022-07-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* The minimum supported Node.js version is 14.18.3
+
+
+### Features
+
+* support Vue 2.7 ([0c00636](https://github.com/prepair/require-extension-vue/commit/0c00636ab7742578501c579b3d9ba95771c99584))
+
+
+### Chores
+
+* update dependencies
+  
+
+## [2.0.3](https://github.com/prepair/require-extension-vue/compare/v2.0.2...v2.0.3) (2021-11-05)
 
 
 ### Bug Fixes
 
 * revert: use virtual script.js/.ts filename for babel transform ([82af506](https://github.com/prepair/require-extension-vue/commit/82af506ff710c0d3fa63f68789f101c7ca1ad03a))
 
-### [2.0.2](https://github.com/prepair/require-extension-vue/compare/v2.0.1...v2.0.2) (2021-10-22)
+## [2.0.2](https://github.com/prepair/require-extension-vue/compare/v2.0.1...v2.0.2) (2021-10-22)
 
 
 ### Bug Fixes
 
 * use virtual script.js/.ts filename for babel transform ([0f61449](https://github.com/prepair/require-extension-vue/commit/0f614499308db04effa0b6ad3cb80ed401ff7a14))
 
-### [2.0.1](https://github.com/prepair/require-extension-vue/compare/v2.0.0...v2.0.1) (2021-05-28)
+## [2.0.1](https://github.com/prepair/require-extension-vue/compare/v2.0.0...v2.0.1) (2021-05-28)
 
 ## [2.0.0](https://github.com/prepair/require-extension-vue/compare/v1.0.4...v2.0.0) (2021-05-28)
 
@@ -28,18 +46,18 @@ supported Node.js version to 12
 
 * **package.json:** update dependencies ([9daeb3e](https://github.com/prepair/require-extension-vue/commit/9daeb3e0a84513982ffef9491122b4f24e4a1cad))
 
-### [1.0.4](https://github.com/prepair/require-extension-vue/compare/v1.0.3...v1.0.4) (2020-12-10)
+## [1.0.4](https://github.com/prepair/require-extension-vue/compare/v1.0.3...v1.0.4) (2020-12-10)
 
 
 ### Bug Fixes
 
 * fix case when cache metadata external script or template not exists anymore ([0e71ab1](https://github.com/prepair/require-extension-vue/commit/0e71ab10bd1ee67907605595333da9384a583cf7))
 
-### [1.0.3](https://github.com/prepair/require-extension-vue/compare/v1.0.2...v1.0.3) (2020-03-14)
+## [1.0.3](https://github.com/prepair/require-extension-vue/compare/v1.0.2...v1.0.3) (2020-03-14)
 
-### [1.0.2](https://github.com/prepair/require-extension-vue/compare/v1.0.1...v1.0.2) (2020-03-14)
+## [1.0.2](https://github.com/prepair/require-extension-vue/compare/v1.0.1...v1.0.2) (2020-03-14)
 
-### [1.0.1](https://github.com/prepair/require-extension-vue/compare/v1.0.0...v1.0.1) (2019-12-13)
+## [1.0.1](https://github.com/prepair/require-extension-vue/compare/v1.0.0...v1.0.1) (2019-12-13)
 
 
 ### Bug Fixes

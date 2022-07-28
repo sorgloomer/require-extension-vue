@@ -1,6 +1,6 @@
 {
   "name": "@prepair/require-extension-vue",
-  "version": "2.0.3",
+  "version": "3.0.0",
   "description": "Simple vue file support for node. Mainly for testing purposes.",
   "main": "./src/index.js",
   "exports": "./src/index.js",
