@@ -2,33 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [3.0.0](https://github.com/prepair/require-extension-vue/compare/v2.0.3...v3.0.0) (2022-07-28)
+## [3.0.1](https://github.com/prepair/require-extension-vue/compare/v3.0.0...v3.0.1) (2024-01-30)
 
+### Chores
+
+* Remove unnecessary npm engine restriction to allow unrestricted usage
+
+## [3.0.0](https://github.com/prepair/require-extension-vue/compare/v2.0.3...v3.0.0) (2022-07-28)
 
 ### ⚠ BREAKING CHANGES
 
 * The minimum supported Node.js version is 14.18.3
 
-
 ### Features
 
 * support Vue 2.7 ([0c00636](https://github.com/prepair/require-extension-vue/commit/0c00636ab7742578501c579b3d9ba95771c99584))
 
-
 ### Chores
 
 * update dependencies
-  
 
 ## [2.0.3](https://github.com/prepair/require-extension-vue/compare/v2.0.2...v2.0.3) (2021-11-05)
-
 
 ### Bug Fixes
 
 * revert: use virtual script.js/.ts filename for babel transform ([82af506](https://github.com/prepair/require-extension-vue/commit/82af506ff710c0d3fa63f68789f101c7ca1ad03a))
 
 ## [2.0.2](https://github.com/prepair/require-extension-vue/compare/v2.0.1...v2.0.2) (2021-10-22)
-
 
 ### Bug Fixes
 
@@ -38,7 +38,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [2.0.0](https://github.com/prepair/require-extension-vue/compare/v1.0.4...v2.0.0) (2021-05-28)
 
-
 ### ⚠ BREAKING CHANGES
 
 * **package.json:** upgrading fs-extra to latest raises the minimum
@@ -47,7 +46,6 @@ supported Node.js version to 12
 * **package.json:** update dependencies ([9daeb3e](https://github.com/prepair/require-extension-vue/commit/9daeb3e0a84513982ffef9491122b4f24e4a1cad))
 
 ## [1.0.4](https://github.com/prepair/require-extension-vue/compare/v1.0.3...v1.0.4) (2020-12-10)
-
 
 ### Bug Fixes
 
@@ -59,14 +57,12 @@ supported Node.js version to 12
 
 ## [1.0.1](https://github.com/prepair/require-extension-vue/compare/v1.0.0...v1.0.1) (2019-12-13)
 
-
 ### Bug Fixes
 
 * **permanent cache:** external scripts and templates should be considered in cache validation to avoid staled cached vue file usage ([d42d641](https://github.com/prepair/require-extension-vue/commit/d42d64189f818fce95c6d3525b35f764f66a8211))
 * **source-map:** generate source map from external script if referenced from vue file ([724a475](https://github.com/prepair/require-extension-vue/commit/724a475d730d1ef5ea87cbb012333639b648809e))
 
 ## 1.0.0 (2019-12-03)
-
 
 ### Features
 
