@@ -123,3 +123,8 @@ Taken some ideas from the following projects. Some of them are more robust and s
 - [jackmellis/require-extension-hooks-vue](https://github.com/jackmellis/require-extension-hooks-vue) and [require-extension-hooks](https://github.com/jackmellis/require-extension-hooks)
 - [lixinliang/require-extension-vue](https://github.com/lixinliang/require-extension-vue)
 - [vue-loader](https://github.com/vuejs/vue-loader)
+
+## Development
+
+- **Node.js** : >= 14.18.3
+- **npm**     : ^8.4.1
