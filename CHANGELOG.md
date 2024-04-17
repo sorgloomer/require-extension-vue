@@ -7,9 +7,12 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### ⚠ BREAKING CHANGES
 
-* raising minimum Node version to 18.18.2 (6 months old att)
+* The minimum supported Node.js version is 18.18.2
 
-* raising minimum Node version to 18.18.2 (6 months old att) ([8151d51](https://github.com/prepair/require-extension-vue/commit/8151d519c4ae5b50979f981267df9a152966a055))
+### Chores
+
+* Update dependencies
+
 
 ## [3.0.1](https://github.com/prepair/require-extension-vue/compare/v3.0.0...v3.0.1) (2024-01-30)
 
