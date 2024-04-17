@@ -142,7 +142,7 @@ const toCwdRelativeMetadataPath = (filePath) =>
     .replace(cwd, '')
     .replace(/^[/\\]/, '')
     // note: we want unix style paths in metadata json
-    .replace(/\\/g, '/');
+    .replaceAll('\\', '/');
 
 /**
  * @type {(vueMetada: Object<string, any>) => string}

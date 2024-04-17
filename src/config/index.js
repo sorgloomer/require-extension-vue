@@ -167,6 +167,7 @@ const verifyOptions = (options) => {
       '[require-extension-vue: error] Invalid options are provided:\n\n',
       ajv.errors
     );
+    // eslint-disable-next-line n/no-process-exit
     process.exit(1);
   }
 };

@@ -11,17 +11,18 @@ module.exports = {
   },
 
   parserOptions: {
-    ecmaVersion: 2020,
+    ecmaVersion: 2022,
     sourceType: 'module',
   },
 
   plugins: ['unicorn', 'mocha'],
 
   extends: [
-    'semistandard',
     'plugin:import/errors',
     'plugin:import/warnings',
     'plugin:mocha/recommended',
+    'plugin:n/recommended',
+    'plugin:promise/recommended',
     'plugin:unicorn/recommended',
     'plugin:vue/recommended',
     'prettier',
