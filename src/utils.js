@@ -9,12 +9,12 @@ const nullary = R.nAry(0);
 /**
  * @type {(name: string, obj: Object<string, any>) => boolean}
  */
-const propEqTrue = R.propEq(R.__, true, R.__);
+const propEqTrue = R.propEq(true, R.__, R.__);
 
 /**
  * @type {(name: string, obj: Object<string, any>) => boolean}
  */
-const propEqFalse = R.propEq(R.__, false, R.__);
+const propEqFalse = R.propEq(false, R.__, R.__);
 
 /**
  * @type {(type: string, value: any) => boolean}
