@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0](https://github.com/prepair/require-extension-vue/compare/v3.0.0...v4.0.0) (2024-04-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* raising minimum Node version to 18.18.2 (6 months old att)
+
+* raising minimum Node version to 18.18.2 (6 months old att) ([8151d51](https://github.com/prepair/require-extension-vue/commit/8151d519c4ae5b50979f981267df9a152966a055))
+
 ## [3.0.1](https://github.com/prepair/require-extension-vue/compare/v3.0.0...v3.0.1) (2024-01-30)
 
 ### Chores
