@@ -10,7 +10,6 @@ const optionsSchema = require('./options-schema');
  *
  * @typedef {Object} Config
  * @property {LogLevelNames} logLevel
- * @property {boolean} emitEsmodule
  * @property {boolean} permanentCache
  * @property {boolean | BabelConfig} babel
  * @property {boolean} noLogParserErrors
@@ -34,7 +33,6 @@ const optionsSchema = require('./options-schema');
  */
 const getDefaultConfig = () => ({
   logLevel: 'warn',
-  emitEsmodule: false,
   permanentCache: false,
   babel: false,
   noLogParserErrors: false,
@@ -147,11 +145,6 @@ const isBabelEnabled = u.compose(
  */
 const isBabelConfigured = u.compose(u.isNotEmptyObject, u.prop('babel'));
 
-/**
- * @type {(config: Config) => boolean}
- */
-const emitEsmodule = u.compose(u.equals(true), u.prop('emitEsmodule'));
-
 const getBabelOptions = u.ifElse(
   isBabelConfigured,
   u.prop('babel'),
@@ -198,7 +191,6 @@ let _config = getDefaultConfig();
 exports = module.exports = {
   getBabelOptions: () => getBabelOptions(_config),
   getDefaultBabelOptions,
-  emitEsmodule: () => emitEsmodule(_config),
   isBabelConfigured: () => isBabelConfigured(_config),
   isBabelEnabled: () => isBabelEnabled(_config),
   isPermanentCacheEnabled: () => isPermanentCacheEnabled(_config),

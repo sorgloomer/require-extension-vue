@@ -8,12 +8,6 @@ const optionsSchema = {
       enum: ['trace', 'debug', 'info', 'warn', 'error', 'silent'],
     },
 
-    emitEsmodule: {
-      default: false,
-      description: 'Emit ESM modules if set to true otherwise CJS modules.',
-      type: 'boolean',
-    },
-
     permanentCache: {
       default: false,
       description: 'Use permanent caching of compiled files.',

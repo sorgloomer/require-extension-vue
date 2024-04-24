@@ -9,7 +9,6 @@ const { SourceMapGenerator } = require('source-map');
 const {
   getDefaultBabelOptions,
   getBabelOptions,
-  emitEsmodule,
   isBabelEnabled,
   isBabelConfigured,
   isParserErrorsOutputEnabled,
@@ -124,7 +123,6 @@ const processScriptBlock = (filename, descriptor) => {
 
   if (
     descriptor.scriptSetup &&
-    !emitEsmodule() &&
     (hasCjsExports(descriptor.script?.content ?? '') ||
       !descriptor.script?.content)
   ) {
@@ -237,16 +235,15 @@ const processTemplateBlock = (filename, descriptor) => {
 
   let compiledTemplateContent = '';
 
+  // eslint-disable-next-line unicorn/prefer-ternary
   if (hasRenderFn) {
-    compiledTemplateContent = emitEsmodule()
-      ? 'var staticRenderFns = [];\nexport { staticRenderFns };'
-      : [
-          `;${COMPONENT_OPTIONS}._compiled=false`,
-          `;${COMPONENT_OPTIONS}.functional=${isFunctional}`,
-          `;${COMPONENT_OPTIONS}.staticRenderFns = []`,
-        ]
-          .join('\n')
-          .trim();
+    compiledTemplateContent = [
+      `;${COMPONENT_OPTIONS}._compiled=false`,
+      `;${COMPONENT_OPTIONS}.functional=${isFunctional}`,
+      `;${COMPONENT_OPTIONS}.staticRenderFns = []`,
+    ]
+      .join('\n')
+      .trim();
   } else {
     compiledTemplateContent = getCompiledTemplate({
       descriptor,
@@ -352,15 +349,13 @@ const getCompiledTemplate = ({ descriptor, source, filename }) => {
     logTemplateCompilerTips(filename, compiled.tips);
   }
 
-  return emitEsmodule()
-    ? compiled.code + `\nexport { render, staticRenderFns };`
-    : [
-        compiled.code,
-        `;${COMPONENT_OPTIONS}._compiled=true`,
-        `;${COMPONENT_OPTIONS}.functional=${isFunctional}`,
-        `;${COMPONENT_OPTIONS}.render = render`,
-        `;${COMPONENT_OPTIONS}.staticRenderFns = staticRenderFns`,
-      ].join('\n');
+  return [
+    compiled.code,
+    `;${COMPONENT_OPTIONS}._compiled=true`,
+    `;${COMPONENT_OPTIONS}.functional=${isFunctional}`,
+    `;${COMPONENT_OPTIONS}.render = render`,
+    `;${COMPONENT_OPTIONS}.staticRenderFns = staticRenderFns`,
+  ].join('\n');
 };
 
 /**

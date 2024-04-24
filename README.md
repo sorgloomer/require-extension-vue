@@ -49,7 +49,6 @@ mocha --require @prepair/require-extension-vue test
 | name | type | default | description
 | - | - | - | - |
 | babel | boolean / object | false | if `true` or non empty object then it will transpile the script block via babel. `true` means that babel will try to load your babel configuration if found otherwise will fallback to `babel-preset-env` set to `current node` setting. Via object value you can provide any valid option to babel which could override/extend your babel configuration too. |
-| emitEsmodule | boolean | false | Emit ESM modules if set to true otherwise CJS modules.|
 | logLevel | string | warn | logging level: `trace`/`debug`/`info`/`warn`/`error`/`silent`. note that this one can be overriden by `REQ_EXT_VUE_LOG_LEVEL` |
 | noLogParserErrors | boolean | false | if `true` no parser errors will be logged in console |
 | noLogTemplateCompilerErrors | boolean | false | if `true` no template compiler errors will be logged in console |
