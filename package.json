@@ -6,7 +6,8 @@
   "exports": "./src/index.js",
   "type": "commonjs",
   "scripts": {
-    "lint": "eslint src",
+    "lint": "eslint src --ext .js,.ts,.vue",
+    "lint:all": "eslint src test --ext .js,.ts,.vue",
     "test": "cross-env NODE_ENV=test mocha",
     "test:watch": "npm run test -- --watch",
     "prerelease": "npm run lint && npm run test",
@@ -62,6 +63,15 @@
   "devDependencies": {
     "@babel/core": "^7.24.4",
     "@babel/preset-env": "^7.24.4",
+    "@tsconfig/node18": "^18.2.4",
+    "@types/babel__core": "^7.20.5",
+    "@types/convert-source-map": "^2.0.3",
+    "@types/find-cache-dir": "^3.2.1",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^18.19.31",
+    "@types/ramda": "^0.29.12",
+    "@typescript-eslint/eslint-plugin": "^7.7.0",
+    "@typescript-eslint/parser": "^7.7.0",
     "chai": "^4.4.1",
     "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
@@ -78,6 +88,7 @@
     "prettier": "^3.2.5",
     "sinon": "^17.0.1",
     "standard-version": "^9.5.0",
+    "typescript": "^5.4.5",
     "vue": "^2.7.16"
   },
   "dependencies": {

@@ -5,6 +5,7 @@
 <script setup>
 const { ref } = require('vue');
 const msg = ref("Hello Script Setup Script'");
+console.log(msg);
 </script>
 
 <style>
