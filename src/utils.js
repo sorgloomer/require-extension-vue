@@ -1,3 +1,5 @@
+// @ts-check
+
 const R = require('ramda');
 
 // unary<T>(fn: (a: T, ...args: readonly any[]) => any): (a: T) => any;
@@ -6,83 +8,63 @@ const R = require('ramda');
  */
 const nullary = R.nAry(0);
 
-/**
- * @type {(name: string, obj: Object<string, any>) => boolean}
- */
-const propEqTrue = R.propEq(true, R.__, R.__);
-
-/**
- * @type {(name: string, obj: Object<string, any>) => boolean}
- */
-const propEqFalse = R.propEq(false, R.__, R.__);
-
-/**
- * @type {(type: string, value: any) => boolean}
- */
 const isOfType = R.curry(
   (type, value) => Object.prototype.toString.call(value) === type
 );
 
 /**
- * @type {(value: any) => boolean}
+ * @type {(value: unknown) => value is RegExp}
  */
 const isRegExp = isOfType('[object RegExp]');
 
 /**
- * @type {(value: any) => boolean}
+ * @type {(value: unknown) => value is string}
  */
 const isString = isOfType('[object String]');
 
 /**
- * @type {(value: any) => boolean}
+ * @type {(value: unknown) => value is boolean}
  */
 const isBoolean = isOfType('[object Boolean]');
 
 /**
- * @type {(value: any) => boolean}
+ * @type {(value: unknown) => boolean}
  */
 const isNotEmpty = R.complement(R.isEmpty);
 
 /**
- * @template T
- * @type {(arr: T[], value: T) => boolean}
- */
-const contained = R.curry((arr, value) => (arr || []).includes(value));
-
-/**
- * @type {(value: any) => boolean}
+ * @type {(value: unknown) => boolean}
  */
 const isObject = isOfType('[object Object]');
 
 /**
- * @type {(value: any) => boolean}
+ * @type {(value: unknown) => boolean}
  */
 const isNotObject = R.complement(isObject);
 
 /**
- * @type {(value: any) => boolean}
+ * @type {(value: unknown) => boolean}
  */
 const isNotEmptyObject = R.both(isObject, isNotEmpty);
 
 /**
- * @type {(value: any) => boolean}
+ * @type {(value: unknown) => value is Function}
  */
 const _isFunction = isOfType('[object Function]');
 
 /**
- * @type {(value: any) => boolean}
+ * @type {(value: unknown) => boolean}
  */
 const isAsyncFunction = isOfType('[object AsyncFunction]');
 
 /**
- * @type {(value: any) => boolean}
+ * @type {(value: unknown) => boolean}
  */
 const isFunction = R.either(_isFunction, isAsyncFunction);
 
 exports = module.exports = {
   ...R,
 
-  contained,
   isBoolean,
   isFunction,
   isNotEmpty,
@@ -92,6 +74,4 @@ exports = module.exports = {
   isRegExp,
   isString,
   nullary,
-  propEqTrue,
-  propEqFalse,
 };

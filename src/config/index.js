@@ -112,7 +112,7 @@ const messageFilter = (excludes, message) => {
 /**
  * @type {(config: Object<string, any>) => boolean}
  */
-const isPermanentCacheEnabled = u.propEqTrue('permanentCache');
+const isPermanentCacheEnabled = u.propEq(true, 'permanentCache');
 
 /**
  * @type {(config: Object<string, any>) => boolean}
