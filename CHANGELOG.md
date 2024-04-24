@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.1.0](https://github.com/prepair/require-extension-vue/compare/v4.0.0...v4.1.0) (2024-04-24)
+
+
+### Features
+
+* **cache:** version cache file and add vueVersion to invalidate when changes ([6917cbb](https://github.com/prepair/require-extension-vue/commit/6917cbb7740e83f390a922b48a292fbb832ec749))
+
 ## [4.0.0](https://github.com/prepair/require-extension-vue/compare/v3.0.0...v4.0.0) (2024-04-17)
 
 
