@@ -7,8 +7,8 @@
 const { resolveCompiler } = require('./resolve-compiler');
 
 /**
- * @typedef { import('vue/compiler-sfc').SFCDescriptor } SFCDescriptor
- * @typedef { import('vue/compiler-sfc').SFCScriptBlock } SFCScriptBlock
+ * @typedef { import('vue2/compiler-sfc').SFCDescriptor } SFCDescriptor
+ * @typedef { import('vue2/compiler-sfc').SFCScriptBlock } SFCScriptBlock
  */
 
 /**

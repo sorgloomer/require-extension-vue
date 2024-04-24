@@ -17,19 +17,19 @@ const {
   parserErrorMessageFilter,
   templateCompilerErrorMessageFilter,
   templateCompilerTipMessageFilter,
-} = require('./config');
-const u = require('./utils');
+} = require('../config');
+const u = require('../utils');
 const { resolveCompiler } = require('./resolve-compiler');
 const { resolveScript } = require('./resolve-script');
 
 /**
  * @typedef { import('@babel/core').BabelFileResult } BabelFileResult
  * @typedef { import('source-map').RawSourceMap } RawSourceMap
- * @typedef { import('vue/compiler-sfc').SFCBlock } SFCBlock
- * @typedef { import('vue/compiler-sfc').SFCCustomBlock } SFCCustomBlock
- * @typedef { import('vue/compiler-sfc').SFCDescriptor } SFCDescriptor
- * @typedef { import('vue/compiler-sfc').WarningMessage } WarningMessage
- * @typedef { import('./types').SfcMetadata } SfcMetadata
+ * @typedef { import('vue2/compiler-sfc').SFCBlock } SFCBlock
+ * @typedef { import('vue2/compiler-sfc').SFCCustomBlock } SFCCustomBlock
+ * @typedef { import('vue2/compiler-sfc').SFCDescriptor } SFCDescriptor
+ * @typedef { import('vue2/compiler-sfc').WarningMessage } WarningMessage
+ * @typedef { import('../types').SfcMetadata } SfcMetadata
  */
 
 const REGEX_FUNCTIONAL_COMPONENT = /functional\s*:\s*true/;

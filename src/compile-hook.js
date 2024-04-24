@@ -1,7 +1,12 @@
 const log = require('loglevel');
-const compile = require('./compile');
 const { isPermanentCacheEnabled } = require('./config');
 const { getCachedFile, setCachedFile } = require('./cache');
+const u = require('./utils');
+
+const compile =
+  u.getCurrentVueVersion().major < 3
+    ? require('./vue2/compile')
+    : require('./vue3/compile');
 
 let compiling = false;
 

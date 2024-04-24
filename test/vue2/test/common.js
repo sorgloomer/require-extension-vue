@@ -1,6 +1,6 @@
 const path = require('node:path');
 const { expect } = require('chai');
-const { isFunction } = require('../src/utils');
+const { isFunction } = require('../../../src/utils');
 
 const clearRelatedRequireCache = () => {
   // note: it is safer to always reset require.cache containing `test/*` stuff

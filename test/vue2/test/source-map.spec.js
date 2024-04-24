@@ -3,7 +3,7 @@ const { expect } = require('chai');
 
 describe('source map', () => {
   it('should output proper stack trace backed up by inlined source map when babel is used', function () {
-    require('..')({
+    require('../../..')({
       babel: {
         cwd: path.resolve(__dirname, 'fixtures', 'source-map-babel'),
         babelrc: false,
@@ -27,7 +27,7 @@ describe('source map', () => {
   });
 
   it('should output proper stack trace backed up by inlined source map when babel is not used', function () {
-    require('..')({ babel: false });
+    require('../../..')({ babel: false });
     const component = require('./fixtures/source-map');
 
     let errorStack = null;
@@ -44,7 +44,7 @@ describe('source map', () => {
   });
 
   it('should output proper stack trace backed up by inlined source map when external script and babel is used', function () {
-    require('..')({
+    require('../../..')({
       babel: {
         cwd: path.resolve(__dirname, 'fixtures', 'source-map-external-babel'),
         babelrc: false,
@@ -68,7 +68,7 @@ describe('source map', () => {
   });
 
   it('should output proper stack trace backed up by inlined source map when external script is used', function () {
-    require('..')({ babel: false });
+    require('../../..')({ babel: false });
     const component = require('./fixtures/source-map-external');
 
     let errorStack = null;

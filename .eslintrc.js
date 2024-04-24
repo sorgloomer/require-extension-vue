@@ -29,7 +29,6 @@ module.exports = {
     'plugin:promise/recommended',
     'plugin:unicorn/recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:vue/recommended',
     'prettier',
   ],
 
@@ -59,9 +58,6 @@ module.exports = {
     'unicorn/prefer-module': 'off',
     'unicorn/prevent-abbreviations': 'off',
 
-    // vue
-    'vue/multi-word-component-names': 'off',
-
     // mocha
     'mocha/no-global-tests': 'off',
     'mocha/no-mocha-arrows': 'off',
@@ -71,18 +67,4 @@ module.exports = {
     // typescript
     '@typescript-eslint/no-var-requires': 'off',
   },
-
-  overrides: [
-    {
-      files: ['test/**/*.spec.js'],
-
-      env: {
-        mocha: true,
-      },
-
-      globals: {
-        expect: 'readonly',
-      },
-    },
-  ],
 };

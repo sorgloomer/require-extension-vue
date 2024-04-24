@@ -47,7 +47,7 @@ let _currentVueVersion;
  */
 const initialize = () => {
   log.info('[require-extension-vue info] initializing permanent cache');
-  _currentVueVersion = getCurrentVueVersion();
+  _currentVueVersion = u.getCurrentVueVersion().version;
   _cacheMetadata = getCacheMetadata() || getDefaultCacheMetadata();
 };
 
@@ -255,33 +255,10 @@ const getCachedFilePath = (filePath) => {
 function getDefaultCacheMetadata() {
   return {
     version: CURRENT_VERSION,
-    vueVersion: getCurrentVueVersion(),
+    vueVersion: u.getCurrentVueVersion().version,
     entries: {},
   };
 }
-
-/**
- * @type {() => string}
- */
-const getCurrentVueVersion = () => {
-  if (_currentVueVersion) return _currentVueVersion;
-  const vuePkg = /** @type {{ version: string }} */ (
-    loadFromContext('vue/package.json')
-  );
-  return vuePkg.version;
-};
-
-/**
- * @type { (path: string) => unknown }
- */
-// todo: dedupe
-const loadFromContext = (path) => {
-  return require(
-    require.resolve(path, {
-      paths: [process.cwd()],
-    })
-  );
-};
 
 exports = module.exports = {
   getCachedFile,

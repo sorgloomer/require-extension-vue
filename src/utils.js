@@ -2,6 +2,51 @@
 
 const R = require('ramda');
 
+/**
+ * @typedef {Object} VueVersion
+ * @property {string} version
+ * @property {number} major
+ * @property {number} minor
+ * @property {number} patch
+ */
+
+/**
+ * @type {VueVersion}
+ */
+let _currentVueVersion;
+
+/**
+ * @type {() => VueVersion}
+ */
+const getCurrentVueVersion = () => {
+  if (_currentVueVersion) return _currentVueVersion;
+
+  const vuePkgJson = /** @type {{ version: string }} */ (
+    loadFromContext('vue/package.json')
+  );
+
+  const { version } = vuePkgJson;
+  const [major, minor, patch] = vuePkgJson.version.split('.').map(Number);
+
+  return {
+    version,
+    major: major,
+    minor: minor,
+    patch: patch,
+  };
+};
+
+/**
+ * @type { (path: string) => unknown }
+ */
+const loadFromContext = (path) => {
+  return require(
+    require.resolve(path, {
+      paths: [process.cwd()],
+    })
+  );
+};
+
 // unary<T>(fn: (a: T, ...args: readonly any[]) => any): (a: T) => any;
 /**
  * @type {(...args: readonly any[]) => () => any}
@@ -74,4 +119,6 @@ exports = module.exports = {
   isRegExp,
   isString,
   nullary,
+  getCurrentVueVersion,
+  loadFromContext,
 };

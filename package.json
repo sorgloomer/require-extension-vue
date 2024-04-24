@@ -7,13 +7,15 @@
   "type": "commonjs",
   "scripts": {
     "lint": "eslint src --ext .js,.ts,.vue",
-    "lint:all": "eslint src test --ext .js,.ts,.vue",
-    "test": "cross-env NODE_ENV=test mocha",
-    "test:watch": "npm run test -- --watch",
+    "lint:all": "npm run lint --workspaces --include-workspace-root --if-present",
+    "test": "npm run test --workspaces --if-present",
     "prerelease": "npm run lint && npm run test",
     "release": "git checkout master && git pull --rebase origin master && standard-version && git push --follow-tags origin master && npm publish --access=public",
     "prepare": "husky"
   },
+  "workspaces": [
+    "test/vue2"
+  ],
   "prettier": {
     "printWidth": 80,
     "tabWidth": 2,
@@ -26,12 +28,6 @@
     "arrowParens": "always",
     "vueIndentScriptAndStyle": false,
     "endOfLine": "lf"
-  },
-  "mocha": {
-    "require": "test/setup.js",
-    "spec": "test/**/*.spec.js",
-    "timeout": 4000,
-    "color": true
   },
   "lint-staged": {
     "*.js": [
@@ -62,8 +58,6 @@
   ],
   "devDependencies": {
     "@babel/core": "^7.24.4",
-    "@babel/preset-env": "^7.24.4",
-    "@babel/preset-typescript": "^7.24.1",
     "@tsconfig/node18": "^18.2.4",
     "@types/babel__core": "^7.20.5",
     "@types/convert-source-map": "^2.0.3",
@@ -73,8 +67,6 @@
     "@types/ramda": "^0.29.12",
     "@typescript-eslint/eslint-plugin": "^7.7.0",
     "@typescript-eslint/parser": "^7.7.0",
-    "chai": "^4.4.1",
-    "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",
@@ -85,12 +77,10 @@
     "eslint-plugin-vue": "^9.25.0",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
-    "mocha": "^10.4.0",
     "prettier": "^3.2.5",
-    "sinon": "^17.0.1",
     "standard-version": "^9.5.0",
     "typescript": "^5.4.5",
-    "vue": "^2.7.16"
+    "vue2": "npm:vue@^2.7.16"
   },
   "dependencies": {
     "ajv": "^8.12.0",

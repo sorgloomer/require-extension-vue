@@ -31,7 +31,7 @@ describe('permanent cache', () => {
     fse.existsSync.withArgs(vueFileAbsolute).returns(true);
     fse.statSync.withArgs(vueFileAbsolute).returns(vueFileStat);
 
-    require('..')({
+    require('../../..')({
       permanentCache: true,
       babel: {
         cwd: path.resolve(__dirname, 'fixtures', 'permanent-cache-esm'),
@@ -123,7 +123,7 @@ describe('permanent cache', () => {
       )
       .returns("exports = module.exports = 'Permanent Cache (esm)';");
 
-    require('..')({
+    require('../../..')({
       permanentCache: true,
       babel: {
         cwd: path.resolve(__dirname, 'fixtures', 'permanent-cache-esm'),
@@ -170,7 +170,7 @@ describe('permanent cache', () => {
     fse.existsSync.withArgs(vueFileAbsolute).returns(true);
     fse.statSync.withArgs(vueFileAbsolute).returns(vueFileStat);
 
-    require('..')({
+    require('../../..')({
       permanentCache: true,
       babel: {
         cwd: path.resolve(__dirname, 'fixtures', 'permanent-cache-esm'),
@@ -273,7 +273,7 @@ describe('permanent cache', () => {
         "exports = module.exports = 'Permanent Cache External Script (esm)';"
       );
 
-    require('..')({
+    require('../../..')({
       permanentCache: true,
       babel: {
         cwd: path.resolve(
@@ -339,7 +339,7 @@ describe('permanent cache', () => {
     fse.existsSync.withArgs(vueScriptFileAbsolute).returns(true);
     fse.statSync.withArgs(vueScriptFileAbsolute).returns(vueScriptFileStat);
 
-    require('..')({
+    require('../../..')({
       permanentCache: true,
       babel: {
         cwd: path.resolve(
@@ -437,7 +437,7 @@ describe('permanent cache', () => {
     fse.statSync.withArgs(vueFileAbsolute).returns(vueFileStat);
     fse.existsSync.withArgs(vueScriptFileAbsolute).returns(false);
 
-    require('..')({
+    require('../../..')({
       permanentCache: true,
       babel: {
         cwd: path.resolve(__dirname, 'fixtures', 'permanent-cache-esm'),
@@ -540,7 +540,7 @@ describe('permanent cache', () => {
         "exports = module.exports = 'Permanent Cache External Template (esm)';"
       );
 
-    require('..')({
+    require('../../..')({
       permanentCache: true,
       babel: {
         cwd: path.resolve(
@@ -604,7 +604,7 @@ describe('permanent cache', () => {
     fse.existsSync.withArgs(vueTemplateFileAbsolute).returns(true);
     fse.statSync.withArgs(vueTemplateFileAbsolute).returns(vueTemplateFileStat);
 
-    require('..')({
+    require('../../..')({
       permanentCache: true,
       babel: {
         cwd: path.resolve(
@@ -702,7 +702,7 @@ describe('permanent cache', () => {
     fse.statSync.withArgs(vueFileAbsolute).returns(vueFileStat);
     fse.existsSync.withArgs(vueTemplateFileAbsolute).returns(false);
 
-    require('..')({
+    require('../../..')({
       permanentCache: true,
       babel: {
         cwd: path.resolve(__dirname, 'fixtures', 'permanent-cache-esm'),
@@ -752,7 +752,7 @@ describe('permanent cache', () => {
   });
 
   it('should not read from cache nor write to it when caching is disabled (esm)', () => {
-    require('..')({
+    require('../../..')({
       permanentCache: false,
       babel: {
         cwd: path.resolve(__dirname, 'fixtures', 'permanent-cache-esm'),
