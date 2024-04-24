@@ -63,6 +63,7 @@
   "devDependencies": {
     "@babel/core": "^7.24.4",
     "@babel/preset-env": "^7.24.4",
+    "@babel/preset-typescript": "^7.24.1",
     "@tsconfig/node18": "^18.2.4",
     "@types/babel__core": "^7.20.5",
     "@types/convert-source-map": "^2.0.3",
@@ -106,6 +107,7 @@
   "peerDependencies": {
     "@babel/core": "7.x",
     "@babel/preset-env": "7.x",
+    "@babel/preset-typescript": "7.x",
     "vue": "^2.7.0"
   },
   "peerDependenciesMeta": {
@@ -113,6 +115,9 @@
       "optional": true
     },
     "@babel/preset-env": {
+      "optional": true
+    },
+    "@babel/preset-typescript": {
       "optional": true
     }
   }

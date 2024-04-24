@@ -64,6 +64,22 @@ const getDefaultBabelOptions = () => ({
         targets: 'current node',
       },
     ],
+    [
+      '@babel/preset-typescript',
+      {
+        // note: We need this so scripts in vue files will be processed as TS as well
+        //  (The filename passed to babel has .vue extension which won't trigger
+        //  TS processing because only .ts/.tsx/.mts/.cts extension are set up by
+        //  this preset. We could do this only for .vue files if we register the
+        //  TS plugin manually with test clauses, but using this allExtensions flag
+        //  is ok and safe because it doesn't affect the performance.)
+        allExtensions: true,
+
+        allowDeclareFields: true,
+        onlyRemoveTypeImports: false, // warn: setting this true erases enums at runtime so NOK
+        optimizeConstEnums: true,
+      },
+    ],
   ],
 
   exclude: /node_modules/,
