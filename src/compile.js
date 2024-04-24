@@ -82,7 +82,7 @@ const compile = (source, filename) => {
 
   return {
     code: result,
-    vueMetadata: {
+    sfcMetadata: {
       filePath: filename,
       externalScriptPath,
       externalTemplatePath,

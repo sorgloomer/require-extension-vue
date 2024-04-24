@@ -1,5 +1,5 @@
 <template>
-  <p class="blue">Permanent Cache External Script</p>
+  <p class="blue">Permanent Cache External Script (esm)</p>
 </template>
 
 <script src="./script.js"></script>

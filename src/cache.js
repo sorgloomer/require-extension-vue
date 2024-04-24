@@ -1,3 +1,5 @@
+// @ts-check
+
 const fse = require('fs-extra');
 const path = require('node:path');
 const log = require('loglevel');
@@ -8,27 +10,51 @@ const findCacheDir = (options = {}) => {
   return _findCacheDir({ name: moduleName, ...options });
 };
 
+/**
+ * @typedef { import('./types').SfcMetadata } SfcMetadata
+ *
+ * @typedef { Object } CacheMetadataV2
+ * @property { number } version
+ * @property { string } vueVersion
+ * @property { Record<string, CacheMetadataEntry> } entries
+ *
+ * @typedef { Record<string, CacheMetadataEntry> } CacheMetadataV1
+ *
+ * @typedef { Object } CacheMetadataEntry
+ * @property { number | null } mtimeMs
+ * @property { { path: string, mtimeMs: number } | null  } externalTemplate
+ * @property { { path: string, mtimeMs: number } | null } externalScript
+ */
+
+const CURRENT_VERSION = 2;
 const ENCODING_UTF8 = 'utf8';
 const moduleName = 'require-extension-vue';
 const cacheMetadataFile = 'revue.json';
 const cwd = path.resolve('.');
 
-let _cacheMetadata = {};
+/**
+ * @type { CacheMetadataV2 }
+ */
+let _cacheMetadata;
+
+/**
+ * @type { string }
+ */
+let _currentVueVersion;
 
 /**
  * @type {() => void}
  */
 const initialize = () => {
   log.info('[require-extension-vue info] initializing permanent cache');
-  _cacheMetadata = getCacheMetadata() || {};
+  _currentVueVersion = getCurrentVueVersion();
+  _cacheMetadata = getCacheMetadata() || getDefaultCacheMetadata();
 };
 
 /**
- * @type {() => Object<string, any>}
+ * @type {() => CacheMetadataV2 | null}
  */
 const getCacheMetadata = () => {
-  let cacheMetadata = null;
-
   const cacheMetadataFilePath = getCacheMetadataFilePath();
   const isCacheMetadataFileExists = fse.existsSync(cacheMetadataFilePath);
   log.info(
@@ -36,31 +62,46 @@ const getCacheMetadata = () => {
       isCacheMetadataFileExists ? 'exists' : 'not exists'
     }`
   );
-  if (!isCacheMetadataFileExists) return cacheMetadata;
+  if (!isCacheMetadataFileExists) return null;
+
+  /** @type { CacheMetadataV2 | CacheMetadataV1 | null} */
+  let readCacheMetadata = null;
 
   try {
     log.info(
       `[require-extension-vue info] reading cache metadata from ${cacheMetadataFilePath}`
     );
-    cacheMetadata = JSON.parse(fse.readFileSync(cacheMetadataFilePath, 'utf8'));
+    readCacheMetadata = JSON.parse(
+      fse.readFileSync(cacheMetadataFilePath, 'utf8')
+    );
   } catch {
     log.error(
       `[require-extension-vue error] failed to read cache metadata from: ${cacheMetadataFilePath}`
     );
   }
 
-  return cacheMetadata;
+  if (
+    readCacheMetadata?.version !== CURRENT_VERSION ||
+    readCacheMetadata?.vueVersion !== _currentVueVersion
+  ) {
+    cleanCache();
+    return null;
+  }
+
+  return /** @type { CacheMetadataV2 } */ (readCacheMetadata);
 };
 
 /**
  * @type {() => void}
  */
-// const cleanCache = () => {
-//   fse.emptyDirSync(cachePath);
-// };
+const cleanCache = () => {
+  const cachePath = findCacheDir();
+  if (!cachePath) return;
+  fse.emptyDirSync(cachePath);
+};
 
 /**
- * @type {(filePath: string) => string}
+ * @type { (filePath: string) => string | null }
  */
 const getCachedFile = (filePath) => {
   if (!hasCachedFile(filePath)) {
@@ -75,34 +116,34 @@ const getCachedFile = (filePath) => {
 };
 
 /**
- * @type {(vueMetada: Object<string, any>, content: string) => void}
+ * @type {(sfcMetadata: SfcMetadata, content: string) => void}
  */
-const setCachedFile = (vueMetadata, content) => {
-  const cachedFilePath = getCachedFilePath(vueMetadata.filePath);
+const setCachedFile = (sfcMetadata, content) => {
+  const cachedFilePath = getCachedFilePath(sfcMetadata.filePath);
   log.info(
     `[require-extension-vue info] caching compiled file at: ${cachedFilePath}`
   );
 
   log.info(
-    `[require-extension-vue info] writing compiled file to cache: ${vueMetadata.filePath} => ${cachedFilePath}`
+    `[require-extension-vue info] writing compiled file to cache: ${sfcMetadata.filePath} => ${cachedFilePath}`
   );
   fse.outputFileSync(cachedFilePath, content, ENCODING_UTF8);
 
-  updateCacheMetadata(vueMetadata);
+  updateCacheMetadata(sfcMetadata);
 };
 
 /**
- * @type {(vueMetada: Object<string, any>) => void}
+ * @type {(sfcMetadata: SfcMetadata) => void}
  */
-const updateCacheMetadata = (vueMetadata) => {
+const updateCacheMetadata = (sfcMetadata) => {
   const cacheMetadataFilePath = getCacheMetadataFilePath();
-  const cacheKey = toCwdRelativeMetadataPath(vueMetadata.filePath);
+  const cacheEntryKey = toCwdRelativeMetadataPath(sfcMetadata.filePath);
   log.info(
-    `[require-extension-vue info] updating cache metadata of '${cacheKey}' in memory and on disk at ${cacheMetadataFilePath}`
+    `[require-extension-vue info] updating cache metadata of '${cacheEntryKey}' in memory and on disk at ${cacheMetadataFilePath}`
   );
-  _cacheMetadata = u.assoc(
-    cacheKey,
-    getCacheMetadataValue(vueMetadata),
+  _cacheMetadata = u.assocPath(
+    ['entries', cacheEntryKey],
+    getCacheMetadataEntry(sfcMetadata),
     _cacheMetadata
   );
   fse.outputFileSync(
@@ -116,22 +157,23 @@ const updateCacheMetadata = (vueMetadata) => {
  * @type {(filePath: string) => boolean}
  */
 const hasCachedFile = (filePath) => {
-  const cachedMetadata = _cacheMetadata[toCwdRelativeMetadataPath(filePath)];
-  if (!cachedMetadata) return false;
-  const currentMetadata = getCacheMetadataValue({
+  const cachedMetadataEntry =
+    _cacheMetadata.entries[toCwdRelativeMetadataPath(filePath)];
+  if (!cachedMetadataEntry) return false;
+  const currentMetadataEntry = getCacheMetadataEntry({
     filePath,
     externalScriptPath: u.pathOr(
       null,
       ['externalScript', 'path'],
-      cachedMetadata
+      cachedMetadataEntry
     ),
     externalTemplatePath: u.pathOr(
       null,
       ['externalTemplate', 'path'],
-      cachedMetadata
+      cachedMetadataEntry
     ),
   });
-  return u.equals(cachedMetadata, currentMetadata);
+  return u.equals(cachedMetadataEntry, currentMetadataEntry);
 };
 
 /**
@@ -145,34 +187,41 @@ const toCwdRelativeMetadataPath = (filePath) =>
     .replaceAll('\\', '/');
 
 /**
- * @type {(vueMetada: Object<string, any>) => string}
+ * @type {(sfcMetadata: SfcMetadata) => CacheMetadataEntry}
  */
-const getCacheMetadataValue = (vueMetadata) => {
-  // note: vueMetadata.filePath always exists for sure that is what triggered the
+const getCacheMetadataEntry = (sfcMetadata) => {
+  // note: sfcMetadata.filePath always exists for sure that is what triggered the
   //  hook in the first place
-  const vueMtimeMs = mtimeMs(vueMetadata.filePath);
-  const extScriptMtimeMs = mtimeMs(vueMetadata.externalScriptPath);
-  const extTemplateMtimeMs = mtimeMs(vueMetadata.externalTemplatePath);
+  const vueMtimeMs = mtimeMs(sfcMetadata.filePath);
+  const extScriptMtimeMs = mtimeMs(sfcMetadata.externalScriptPath);
+  const extTemplateMtimeMs = mtimeMs(sfcMetadata.externalTemplatePath);
 
   return {
     mtimeMs: vueMtimeMs,
 
     externalScript: extScriptMtimeMs
       ? {
-          path: toCwdRelativeMetadataPath(vueMetadata.externalScriptPath),
+          path: toCwdRelativeMetadataPath(
+            /** @type string */ (sfcMetadata.externalScriptPath)
+          ),
           mtimeMs: extScriptMtimeMs,
         }
       : null,
 
     externalTemplate: extTemplateMtimeMs
       ? {
-          path: toCwdRelativeMetadataPath(vueMetadata.externalTemplatePath),
+          path: toCwdRelativeMetadataPath(
+            /** @type string */ (sfcMetadata.externalTemplatePath)
+          ),
           mtimeMs: extTemplateMtimeMs,
         }
       : null,
   };
 };
 
+/**
+ * @type {(filePath: string | null | undefined) => number | null}
+ */
 const mtimeMs = (filePath) => {
   if (!filePath) return null;
   const _path = path.resolve(filePath);
@@ -184,7 +233,9 @@ const mtimeMs = (filePath) => {
  * @type {() => string}
  */
 const getCacheMetadataFilePath = () => {
-  const thunk = findCacheDir({ thunk: true });
+  const thunk = /** @type {(s: string) => string} */ (
+    /** @type { unknown } */ (findCacheDir({ thunk: true }))
+  );
   return thunk(cacheMetadataFile);
 };
 
@@ -192,8 +243,44 @@ const getCacheMetadataFilePath = () => {
  * @type {(filePath: string) => string}
  */
 const getCachedFilePath = (filePath) => {
-  const thunk = findCacheDir({ thunk: true });
+  const thunk = /** @type {(s: string) => string} */ (
+    /** @type { unknown } */ (findCacheDir({ thunk: true }))
+  );
   return thunk(filePath.replace(cwd, ''));
+};
+
+/**
+ * @type { () => CacheMetadataV2 }
+ */
+function getDefaultCacheMetadata() {
+  return {
+    version: CURRENT_VERSION,
+    vueVersion: getCurrentVueVersion(),
+    entries: {},
+  };
+}
+
+/**
+ * @type {() => string}
+ */
+const getCurrentVueVersion = () => {
+  if (_currentVueVersion) return _currentVueVersion;
+  const vuePkg = /** @type {{ version: string }} */ (
+    loadFromContext('vue/package.json')
+  );
+  return vuePkg.version;
+};
+
+/**
+ * @type { (path: string) => unknown }
+ */
+// todo: dedupe
+const loadFromContext = (path) => {
+  return require(
+    require.resolve(path, {
+      paths: [process.cwd()],
+    })
+  );
 };
 
 exports = module.exports = {

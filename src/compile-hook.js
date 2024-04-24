@@ -32,9 +32,9 @@ const compileHook = (code, filename) => {
 
   try {
     compiling = true;
-    const { code: compiledCode, vueMetadata } = compile(code, filename);
+    const { code: compiledCode, sfcMetadata } = compile(code, filename);
     if (isPermanentCacheEnabled()) {
-      setCachedFile(vueMetadata, compiledCode);
+      setCachedFile(sfcMetadata, compiledCode);
     }
     return compiledCode;
   } finally {
