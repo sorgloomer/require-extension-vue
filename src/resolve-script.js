@@ -1,35 +1,40 @@
+// @ts-check
+
 /**
- * Based on https://github.com/vuejs/vue-loader/blob/bf901cbffd7211e22d83972811db0e979e4f577a/lib/resolveScript.js
+ * based on https://github.com/vuejs/vue-loader/blob/bf901cbffd7211e22d83972811db0e979e4f577a/lib/resolveScript.js
  */
 
 const { resolveCompiler } = require('./resolve-compiler');
 
+/**
+ * @typedef { import('vue/compiler-sfc').SFCDescriptor } SFCDescriptor
+ * @typedef { import('vue/compiler-sfc').SFCScriptBlock } SFCScriptBlock
+ */
+
+/**
+ * @type {WeakMap<SFCDescriptor, SFCScriptBlock>}
+ */
 const cache = new WeakMap();
 
+/**
+ * @type {(filename: string, descriptor: SFCDescriptor) => SFCScriptBlock | null}
+ */
 const resolveScript = (filename, descriptor) => {
   if (!descriptor.script && !descriptor.scriptSetup) return null;
-
-  const { compiler } = resolveCompiler();
-
-  if (!compiler.compileScript) {
-    if (descriptor.scriptSetup) {
-      throw new Error(
-        'The version of Vue you are using does not support <script setup>. ' +
-          'Please upgrade to 2.7 or above.'
-      );
-    }
-    return descriptor.script;
-  }
 
   const cached = cache.get(descriptor);
   if (cached) return cached;
 
-  let resolved = null;
+  const { compiler } = resolveCompiler();
+
+  /** @type {SFCScriptBlock} */
+  let compiled;
 
   try {
-    resolved = compiler.compileScript(descriptor, {
-      // id: undefined, // relevant for scoped CSS
+    compiled = compiler.compileScript(descriptor, {
+      id: filename, // vue-loader uses short file path, query.id
       isProd: false, // relevant for CSS hashing
+      sourceMap: true,
       // babelParserPlugins: undefined, // not relevant yet
     });
   } catch (error) {
@@ -38,8 +43,8 @@ const resolveScript = (filename, descriptor) => {
     );
   }
 
-  cache.set(descriptor, resolved);
-  return resolved;
+  cache.set(descriptor, compiled);
+  return compiled;
 };
 
 exports.resolveScript = resolveScript;

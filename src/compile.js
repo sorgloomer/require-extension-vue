@@ -1,3 +1,5 @@
+// @ts-check
+
 const path = require('node:path');
 const fse = require('fs-extra');
 const log = require('loglevel');
@@ -21,6 +23,16 @@ const u = require('./utils');
 const { resolveCompiler } = require('./resolve-compiler');
 const { resolveScript } = require('./resolve-script');
 
+/**
+ * @typedef { import('@babel/core').BabelFileResult } BabelFileResult
+ * @typedef { import('source-map').RawSourceMap } RawSourceMap
+ * @typedef { import('vue/compiler-sfc').SFCBlock } SFCBlock
+ * @typedef { import('vue/compiler-sfc').SFCCustomBlock } SFCCustomBlock
+ * @typedef { import('vue/compiler-sfc').SFCDescriptor } SFCDescriptor
+ * @typedef { import('vue/compiler-sfc').WarningMessage } WarningMessage
+ * @typedef { import('./types').SfcMetadata } SfcMetadata
+ */
+
 const REGEX_FUNCTIONAL_COMPONENT = /functional\s*:\s*true/;
 const REGEX_RENDER_FUNCTION = /render\s*:?\s*\(/;
 
@@ -28,13 +40,15 @@ const ENCODING_UTF8 = 'utf8';
 const COMPONENT_OPTIONS =
   '((module.exports.default || module.exports).options || module.exports.default || module.exports)';
 
+/**
+ * @type {(source: string, filename: string) => { code: string, sfcMetadata: SfcMetadata}}
+ */
 const compile = (source, filename) => {
   log.info(`[require-extension-vue info] start compiling: '${filename}'`);
-  const { compiler, templateCompiler } = resolveCompiler();
+  const { compiler } = resolveCompiler();
   const descriptor = compiler.parse({
     source,
     filename,
-    compiler: templateCompiler,
     needMap: true,
   });
 
@@ -46,7 +60,7 @@ const compile = (source, filename) => {
     )}`
   );
 
-  logParserErrors(filename, descriptor.errors);
+  logParserErrors({ source, filename, errors: descriptor.errors });
 
   log.info(
     `[require-extension-vue info] ${
@@ -60,7 +74,7 @@ const compile = (source, filename) => {
   );
   log.info(
     `[require-extension-vue info] ${
-      descriptor.style ? 'has' : 'has no'
+      descriptor.styles.length > 0 ? 'has' : 'has no'
     } style block`
   );
 
@@ -73,9 +87,8 @@ const compile = (source, filename) => {
     descriptor
   );
   const result =
-    [scriptContent, compiledTemplateContent, `\n${scriptMap}`]
-      .join('\n')
-      .trim() + '\n';
+    [scriptContent, compiledTemplateContent, `\n${scriptMap}`].join('\n') +
+    '\n';
 
   log.debug(`[require-extension-vue debug] compiled vue file ${result}`);
   log.info(`[require-extension-vue info] finished compiling: '${filename}'`);
@@ -91,23 +104,29 @@ const compile = (source, filename) => {
 };
 
 /**
- * @type {(filename: string, descriptor: SFCDescriptor) => [string, string]}
+ * @type {(filename: string, descriptor: SFCDescriptor) => [string, string, string | null]}
  */
 const processScriptBlock = (filename, descriptor) => {
   let scriptContent = '';
   let scriptMap = '';
-  let externalScriptPath = null;
-  let content = '';
-  const scriptDescriptor = resolveScript(filename, descriptor);
-  if (!scriptDescriptor) return [scriptContent, scriptMap, externalScriptPath];
 
-  let vueMap = scriptDescriptor.map || null;
-  [content, externalScriptPath] = getBlockContent(scriptDescriptor, filename);
+  /** @type {string | null} */
+  let externalScriptPath = null;
+
+  let content = '';
+  const scriptBlock = resolveScript(filename, descriptor);
+  if (!scriptBlock) return [scriptContent, scriptMap, externalScriptPath];
+
+  let vueMap = /** @type {RawSourceMap} */ (
+    /** @type {Omit<SFCCustomBlock['map'], 'version'>} */ (scriptBlock.map)
+  );
+  [content, externalScriptPath] = getBlockContent(scriptBlock, filename);
 
   if (
     descriptor.scriptSetup &&
     !emitEsmodule() &&
-    (hasCjsExports(descriptor.script?.content) || !descriptor.script?.content)
+    (hasCjsExports(descriptor.script?.content ?? '') ||
+      !descriptor.script?.content)
   ) {
     // note: script setup is always compiled to `export default` ESM syntax so
     //  if we are in CJS land we need to transform it (if component is CJS too)
@@ -141,8 +160,8 @@ const processScriptBlock = (filename, descriptor) => {
 
   const transform = isBabelEnabled() ? babelTransform : nullTransform;
   const transformed = transform(filename, content);
-  scriptContent = transformed.code;
-  const transformMap = transformed.map || null;
+  scriptContent = transformed?.code ?? '';
+  const transformMap = transformed?.map || null;
 
   log.debug(
     `[require-extension-vue debug] transformed script ${JSON.stringify(
@@ -159,14 +178,15 @@ const processScriptBlock = (filename, descriptor) => {
 
   const sourceMap =
     vueMap && transformMap
-      ? merge(vueMap, transformMap)
+      ? // @ts-expect-error oke oke oke ;)
+        merge(vueMap, transformMap)
       : transformMap || vueMap;
   scriptMap = sourceMap ? convert.fromObject(sourceMap).toComment() : '';
   return [scriptContent, scriptMap, externalScriptPath];
 };
 
 /**
- * @type {(filename: string, content: string) => Object<string, any>}
+ * @type {(filename: string, content: string) => RawSourceMap}
  */
 const generateBasicSelfSourceMap = (filename, content) => {
   filename = path.basename(filename);
@@ -183,7 +203,7 @@ const generateBasicSelfSourceMap = (filename, content) => {
 };
 
 /**
- * @type {(filename: string, descriptor: SFCDescriptor) => [string, string]}
+ * @type {(filename: string, descriptor: SFCDescriptor) => [string, string | null]}
  */
 const processTemplateBlock = (filename, descriptor) => {
   const isFunctional = isFunctionalComponent(descriptor);
@@ -201,6 +221,8 @@ const processTemplateBlock = (filename, descriptor) => {
   );
 
   let templateContent = '';
+
+  /** @type {string | null } */
   let externalTemplatePath = null;
 
   if (descriptor.template && !hasRenderFn) {
@@ -240,7 +262,7 @@ const processTemplateBlock = (filename, descriptor) => {
 };
 
 /**
- * @type {(filename: string, scriptContent: string) => string}
+ * @type {(filename: string, scriptContent: string) => BabelFileResult}
  */
 const nullTransform = (filename, scriptContent) => ({
   code: scriptContent,
@@ -248,7 +270,7 @@ const nullTransform = (filename, scriptContent) => ({
 });
 
 /**
- * @type {(filename: string, scriptContent: string) => string}
+ * @type {(filename: string, scriptContent: string) => BabelFileResult | null}
  */
 const babelTransform = (filename, scriptContent) => {
   log.info('[require-extension-vue info] start transpiling script content');
@@ -277,9 +299,9 @@ const babelTransform = (filename, scriptContent) => {
   // note: that .babelrc works mystically, it is not returned by partialConfig
   //  so here we might overwrite it with our defaults but that doesn't happen
   //  for some reason and the thing still works ¯\_(ツ)_/¯
-  const opts = partialConfig.hasFilesystemConfig()
-    ? partialConfig.options
-    : { ...partialConfig.options, ...getDefaultBabelOptions() };
+  const opts = partialConfig?.hasFilesystemConfig()
+    ? partialConfig?.options
+    : { ...partialConfig?.options, ...getDefaultBabelOptions() };
 
   log.debug(
     `[require-extension-vue debug] actual babel options: ${JSON.stringify(
@@ -292,20 +314,22 @@ const babelTransform = (filename, scriptContent) => {
   return transformSync(scriptContent, opts);
 };
 
-const getCompiledTemplate = ({ descriptor, source, filename } = {}) => {
-  const { compiler, templateCompiler } = resolveCompiler();
-  const compilerOptions = { outputSourceRange: true };
+/**
+ * @type {(options: {descriptor: SFCDescriptor, source: string, filename: string }) => string}
+ */
+const getCompiledTemplate = ({ descriptor, source, filename }) => {
+  const { compiler } = resolveCompiler();
+  const compilerOptions = {};
   const isFunctional = isFunctionalComponent(descriptor);
-  const script = resolveScript(filename, descriptor);
+  const scriptBlock = resolveScript(filename, descriptor);
   const compiled = compiler.compileTemplate({
     source,
     filename,
-    compiler: templateCompiler,
     compilerOptions,
     // note: transformAssetUrls might be needed, see how relative asset urls work in templates
     isProduction: false,
     isFunctional,
-    bindings: script ? script.bindings : undefined,
+    bindings: scriptBlock ? scriptBlock.bindings : undefined,
   });
 
   log.debug(
@@ -320,7 +344,6 @@ const getCompiledTemplate = ({ descriptor, source, filename } = {}) => {
     logTemplateCompilerErrors({
       source,
       filename,
-      compilerOptions,
       errors: compiled.errors,
     });
   }
@@ -337,13 +360,11 @@ const getCompiledTemplate = ({ descriptor, source, filename } = {}) => {
         `;${COMPONENT_OPTIONS}.functional=${isFunctional}`,
         `;${COMPONENT_OPTIONS}.render = render`,
         `;${COMPONENT_OPTIONS}.staticRenderFns = staticRenderFns`,
-      ]
-        .join('\n')
-        .trim();
+      ].join('\n');
 };
 
 /**
- * @type {(block: SFCBlock, filename: string) => string}
+ * @type {(block: SFCBlock, filename: string) => [string, string | null]}
  */
 const getBlockContent = (block, filename) => {
   const externalPath = block.src
@@ -384,9 +405,9 @@ const isFunctionalComponent = (descriptor) => {
 };
 
 /**
- * @type {(filename: string, errors: string[]) => void}
+ * @type {(options: { source: string, filename: string, errors: Array<string | WarningMessage>}) => void}
  */
-const logParserErrors = (filename, errors) => {
+const logParserErrors = ({ source, filename, errors }) => {
   log.info(
     `[require-extension-vue info] parser errors output is ${
       isParserErrorsOutputEnabled() ? 'enabled' : 'disabled'
@@ -394,26 +415,28 @@ const logParserErrors = (filename, errors) => {
   );
   if (!isParserErrorsOutputEnabled()) return;
 
+  const { compiler } = resolveCompiler();
   errors = errors
-    .map((error) => `[require-extension-vue: parser error] ${error}`)
+    .map((error) => {
+      if (u.isString(error)) return error;
+      const { msg, start, end } = error;
+      const frame = compiler.generateCodeFrame(source, start, end);
+      return `  ${msg}\n\n${pad(frame)}`;
+    })
     .filter(parserErrorMessageFilter);
 
   if (errors.length > 0) {
     log.error(`[require-extension-vue] parser errors in file: ${filename}`);
+    errors.forEach((error) =>
+      log.error(`[require-extension-vue: parser error] ${error}`)
+    );
   }
-
-  errors.forEach((error) => log.error(error));
 };
 
 /**
- * @type {(filename: string, errors: string[]) => void}
+ * @type {(options: { source: string, filename: string, errors: Array<string | WarningMessage> }) => void}
  */
-const logTemplateCompilerErrors = ({
-  source,
-  filename,
-  compilerOptions,
-  errors,
-}) => {
+const logTemplateCompilerErrors = ({ source, filename, errors }) => {
   log.info(
     `[require-extension-vue info] template compiler errors output is ${
       isTemplateCompilerErrorsOutputEnabled() ? 'enabled' : 'disabled'
@@ -421,24 +444,16 @@ const logTemplateCompilerErrors = ({
   );
   if (!isTemplateCompilerErrorsOutputEnabled()) return;
 
-  const { compiler, templateCompiler } = resolveCompiler();
-  const generateCodeFrame =
-    (templateCompiler && templateCompiler.generateCodeFrame) ||
-    compiler.generateCodeFrame;
-  // 2.6 compiler outputs errors as objects with range
-  const errorsLog =
-    generateCodeFrame && compilerOptions.outputSourceRange
-      ? errors
-          .map(({ msg, start, end }) => {
-            const frame = generateCodeFrame(source, start, end);
-            return `  ${msg}\n\n${pad(frame)}`;
-          })
-          .filter(templateCompilerErrorMessageFilter)
-          .join(`\n\n`)
-      : errors
-          .map((e) => `  - ${e}`)
-          .filter(templateCompilerErrorMessageFilter)
-          .join('\n');
+  const { compiler } = resolveCompiler();
+  const errorsLog = errors
+    .map((error) => {
+      if (u.isString(error)) return error;
+      const { msg, start, end } = error;
+      const frame = compiler.generateCodeFrame(source, start, end);
+      return `  ${msg}\n\n${pad(frame)}`;
+    })
+    .filter(templateCompilerErrorMessageFilter)
+    .join(`\n\n`);
 
   if (errorsLog.length > 0) {
     log.error(`[require-extension-vue] compiler errors in file: ${filename}`);
@@ -449,7 +464,7 @@ const logTemplateCompilerErrors = ({
 };
 
 /**
- * @type {(filename: string, tips: string[]) => void}
+ * @type {(filename: string, tips: Array<string | WarningMessage>) => void}
  */
 const logTemplateCompilerTips = (filename, tips) => {
   log.info(
@@ -460,7 +475,7 @@ const logTemplateCompilerTips = (filename, tips) => {
   if (!isTemplateCompilerTipsOutputEnabled()) return;
 
   tips = tips
-    .map((tip) => (u.isObject(tip) ? tip.msg : tip))
+    .map((tip) => (u.isString(tip) ? tip : tip.msg))
     .map((tip) => `[require-extension-vue: compiler tip] ${tip}`)
     .filter(templateCompilerTipMessageFilter);
 
@@ -483,6 +498,9 @@ const loadBabel = () => {
   return babel;
 };
 
+/**
+ * @type {(source: string) => string}
+ */
 const pad = (source) => {
   return source
     .split(/\r?\n/)
@@ -490,6 +508,9 @@ const pad = (source) => {
     .join('\n');
 };
 
+/**
+ * @type {(code: string) => boolean}
+ */
 const hasCjsExports = (code) => /(?:module\.)?exports\s*=\s*/.test(code);
 
 exports = module.exports = compile;
