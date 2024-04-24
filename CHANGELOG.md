@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.0.0](https://github.com/prepair/require-extension-vue/compare/v4.1.0...v5.0.0) (2024-04-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* only support last minor version of Vue 2 (^2.7.0)
+* drop `emitEsmodule` config option
+
+### Features
+
+* add Vue 3 support \o/ ([e0090ce](https://github.com/prepair/require-extension-vue/commit/e0090cea9c900a0eb7b3f3d7e19d0564d352b728))
+* add babel preset typescript to default babel config ([2911b6f](https://github.com/prepair/require-extension-vue/commit/2911b6f8aca4d0f96b8a08b82293710e4b420e30))
+* only support last minor version of Vue (^2.7.0) ([1768425](https://github.com/prepair/require-extension-vue/commit/1768425f145f8303235d4c8d935a3cc85bae706e))
+* drop emitEsmodule config option ([f63db8a](https://github.com/prepair/require-extension-vue/commit/f63db8a4eb9d6cd2c719c5523428e37dfbc8cb3e))
+
 ## [4.1.0](https://github.com/prepair/require-extension-vue/compare/v4.0.0...v4.1.0) (2024-04-24)
 
 
