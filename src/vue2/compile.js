@@ -40,7 +40,7 @@ const COMPONENT_OPTIONS =
   '((module.exports.default || module.exports).options || module.exports.default || module.exports)';
 
 /**
- * @type {(source: string, filename: string) => { code: string, sfcMetadata: SfcMetadata}}
+ * @type {(source: string, filename: string) => { code: string, hasParserErrors: boolean, hasCompilerErrors: boolean, sfcMetadata: SfcMetadata}}
  */
 const compile = (source, filename) => {
   log.info(`[require-extension-vue info] start compiling: '${filename}'`);
@@ -77,10 +77,8 @@ const compile = (source, filename) => {
     } style block`
   );
 
-  const [compiledTemplateContent, externalTemplatePath] = processTemplateBlock(
-    filename,
-    descriptor
-  );
+  const { compiledTemplateContent, externalTemplatePath, hasCompilerErrors } =
+    processTemplateBlock(filename, descriptor);
   const [scriptContent, scriptMap, externalScriptPath] = processScriptBlock(
     filename,
     descriptor
@@ -94,6 +92,8 @@ const compile = (source, filename) => {
 
   return {
     code: result,
+    hasParserErrors: descriptor.errors.length > 0,
+    hasCompilerErrors,
     sfcMetadata: {
       filePath: filename,
       externalScriptPath,
@@ -201,7 +201,7 @@ const generateBasicSelfSourceMap = (filename, content) => {
 };
 
 /**
- * @type {(filename: string, descriptor: SFCDescriptor) => [string, string | null]}
+ * @type {(filename: string, descriptor: SFCDescriptor) => { compiledTemplateContent: string, externalTemplatePath: string | null, hasCompilerErrors: boolean }}
  */
 const processTemplateBlock = (filename, descriptor) => {
   const isFunctional = isFunctionalComponent(descriptor);
@@ -234,6 +234,7 @@ const processTemplateBlock = (filename, descriptor) => {
   }
 
   let compiledTemplateContent = '';
+  let hasCompilerErrors = false;
 
   // eslint-disable-next-line unicorn/prefer-ternary
   if (hasRenderFn) {
@@ -245,17 +246,19 @@ const processTemplateBlock = (filename, descriptor) => {
       .join('\n')
       .trim();
   } else {
-    compiledTemplateContent = getCompiledTemplate({
-      descriptor,
-      source: templateContent,
-      filename,
-    });
+    ({ code: compiledTemplateContent, hasCompilerErrors } = getCompiledTemplate(
+      {
+        descriptor,
+        source: templateContent,
+        filename,
+      }
+    ));
   }
 
   log.debug(
     `[require-extension-vue debug] compiled template content ${compiledTemplateContent}`
   );
-  return [compiledTemplateContent, externalTemplatePath];
+  return { compiledTemplateContent, externalTemplatePath, hasCompilerErrors };
 };
 
 /**
@@ -312,7 +315,7 @@ const babelTransform = (filename, scriptContent) => {
 };
 
 /**
- * @type {(options: {descriptor: SFCDescriptor, source: string, filename: string }) => string}
+ * @type {(options: {descriptor: SFCDescriptor, source: string, filename: string }) => { code: string, hasCompilerErrors: boolean }}
  */
 const getCompiledTemplate = ({ descriptor, source, filename }) => {
   const { compiler } = resolveCompiler();
@@ -349,13 +352,15 @@ const getCompiledTemplate = ({ descriptor, source, filename }) => {
     logTemplateCompilerTips(filename, compiled.tips);
   }
 
-  return [
+  const code = [
     compiled.code,
     `;${COMPONENT_OPTIONS}._compiled=true`,
     `;${COMPONENT_OPTIONS}.functional=${isFunctional}`,
     `;${COMPONENT_OPTIONS}.render = render`,
     `;${COMPONENT_OPTIONS}.staticRenderFns = staticRenderFns`,
   ].join('\n');
+
+  return { code, hasCompilerErrors: compiled.errors.length > 0 };
 };
 
 /**

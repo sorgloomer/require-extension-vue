@@ -49,7 +49,7 @@ const REGEX_RENDER_FUNCTION = /render\s*:?\s*\(/;
 const ENCODING_UTF8 = 'utf8';
 
 /**
- * @type {(source: string, filename: string) => { code: string, sfcMetadata: SfcMetadata}}
+ * @type {(source: string, filename: string) => { code: string, hasParserErrors: boolean, hasCompilerErrors: boolean, sfcMetadata: SfcMetadata}}
  */
 const compile = (source, filename) => {
   log.info(`[require-extension-vue info] start compiling: '${filename}'`);
@@ -132,6 +132,8 @@ const compile = (source, filename) => {
 
   return {
     code: result,
+    hasParserErrors: parseErrors.length > 0,
+    hasCompilerErrors: (compiledTemplate?.errors.length ?? 0) > 0,
     sfcMetadata: {
       filePath: filename,
       externalScriptPath,

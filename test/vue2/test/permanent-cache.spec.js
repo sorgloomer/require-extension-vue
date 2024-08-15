@@ -772,4 +772,51 @@ describe('permanent cache', () => {
       renderContains: 'Permanent Cache (esm)',
     });
   });
+
+  it('should not store compilation in cache when it has parser errors (esm)', () => {
+    require('../../..')({
+      permanentCache: true,
+      babel: {
+        cwd: path.resolve(
+          __dirname,
+          'fixtures',
+          'permanent-cache-parser-error-esm'
+        ),
+        babelrc: false,
+      },
+    });
+
+    require('./fixtures/permanent-cache-parser-error-esm').default;
+
+    expect(fse.statSync.notCalled).to.equal(true);
+    expect(fse.readFileSync.notCalled).to.equal(true);
+    expect(fse.outputFileSync.notCalled).to.equal(true);
+    expect(fse.outputFile.notCalled).to.equal(true);
+  });
+
+  it('should not store compilation in cache when it has compiler errors (esm)', () => {
+    require('../../..')({
+      permanentCache: true,
+      babel: {
+        cwd: path.resolve(
+          __dirname,
+          'fixtures',
+          'permanent-cache-compiler-error-esm'
+        ),
+        babelrc: false,
+      },
+    });
+
+    const component =
+      require('./fixtures/permanent-cache-compiler-error-esm').default;
+
+    expect(fse.statSync.notCalled).to.equal(true);
+    expect(fse.readFileSync.notCalled).to.equal(true);
+    expect(fse.outputFileSync.notCalled).to.equal(true);
+    expect(fse.outputFile.notCalled).to.equal(true);
+
+    expectComponent(component, {
+      name: 'PermanentCacheCompilerErrorEsm',
+    });
+  });
 });

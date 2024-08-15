@@ -38,6 +38,7 @@ const expectComponent = (value, details = {}) => {
     setupContains,
     'component.setup should include text'
   );
+
   expect(String(value.render)).to.include(
     renderContains,
     'component.render should include text'

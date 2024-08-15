@@ -37,8 +37,13 @@ const compileHook = (code, filename) => {
 
   try {
     compiling = true;
-    const { code: compiledCode, sfcMetadata } = compile(code, filename);
-    if (isPermanentCacheEnabled()) {
+    const {
+      code: compiledCode,
+      hasParserErrors,
+      hasCompilerErrors,
+      sfcMetadata,
+    } = compile(code, filename);
+    if (isPermanentCacheEnabled() && !hasParserErrors && !hasCompilerErrors) {
       setCachedFile(sfcMetadata, compiledCode);
     }
     return compiledCode;

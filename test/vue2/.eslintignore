@@ -1,2 +1,3 @@
 test/fixtures/empty-tags.vue
 test/fixtures/error-multi-root.vue
+test/fixtures/permanent-cache-compiler-error-esm/index.vue
