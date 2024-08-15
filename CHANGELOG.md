@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [5.0.1](https://github.com/prepair/require-extension-vue/compare/v5.0.0...v5.0.1) (2024-08-15)
+
+
+### Bug Fixes
+
+* don't cache compilations with parser or compilation errors ([325d4f4](https://github.com/prepair/require-extension-vue/commit/325d4f4635e95b15836a749be33a33750e1bef5c))
+
+### Chores
+
+* Update dependencies
+
 ## [5.0.0](https://github.com/prepair/require-extension-vue/compare/v4.1.0...v5.0.0) (2024-04-24)
 
 
