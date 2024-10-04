@@ -30,6 +30,17 @@ describe('', () => {
     });
   });
 
+  it('should parse a vue file with script setup (ts)', function () {
+    require('../../..')({
+      babel: true,
+    });
+    const component = require('./fixtures/script-setup-ts');
+    expectComponent(component, {
+      renderContains: 'Script Setup Script Ts',
+      setupContains: 'return {\n      __sfc: true,\n      ref,\n      msg\n    }',
+    });
+  });
+
   it('should parse a vue file with setup fn', function () {
     require('../../..');
     const component = require('./fixtures/setup-fn');

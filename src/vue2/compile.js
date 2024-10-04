@@ -129,10 +129,16 @@ const processScriptBlock = (filename, descriptor) => {
     // note: script setup is always compiled to `export default` ESM syntax so
     //  if we are in CJS land we need to transform it (if component is CJS too)
     content = content.replace(
-      'export default {',
-      '/*#__PURE__*/Object.assign(module.exports, {'
+        'export default /*#__PURE__*/_defineComponent({',
+        '/*#__PURE__*/Object.assign(module.exports, {'
     );
-    content += ');';
+    const contentWithoutJsObjectExport = content.replace(
+        'export default {',
+        '/*#__PURE__*/Object.assign(module.exports, {'
+    );
+    if (contentWithoutJsObjectExport !== content) {
+      content = contentWithoutJsObjectExport + ');';
+    }
   }
 
   if (externalScriptPath) {
