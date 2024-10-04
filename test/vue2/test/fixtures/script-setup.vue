@@ -1,5 +1,5 @@
 <template>
-  <p class="blue">Script Setup Script</p>
+  <p class="blue">Script Setup Script Js</p>
 </template>
 
 <script setup>
@@ -9,7 +9,7 @@ console.log(msg);
 </script>
 
 <style>
-.class = {
+.class {
   color: #00f;
 }
 </style>

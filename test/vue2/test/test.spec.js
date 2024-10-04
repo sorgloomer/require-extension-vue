@@ -12,7 +12,7 @@ describe('', () => {
   });
 
   it('should parse a vue file with script setup + script', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/script-setup-script');
     expectComponent(component, {
       name: 'ScriptSetupScript',
@@ -22,10 +22,10 @@ describe('', () => {
   });
 
   it('should parse a vue file with script setup', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/script-setup');
     expectComponent(component, {
-      renderContains: 'Script Setup',
+      renderContains: 'Script Setup Script Js',
       setupContains: 'return { __sfc: true,ref, msg }',
     });
   });
@@ -36,7 +36,7 @@ describe('', () => {
     expectComponent(component, {
       name: 'SetupFn',
       renderContains: 'Setup Fn',
-      setupContains: 'return { msg }',
+      setupContains: 'return {\n      msg\n    }',
     });
   });
 
