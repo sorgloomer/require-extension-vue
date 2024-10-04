@@ -42,29 +42,29 @@ describe('', () => {
   });
 
   it('should parse a vue file with setup fn', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/setup-fn');
     expectComponent(component, {
       name: 'SetupFn',
       renderContains: 'Setup Fn',
-      setupContains: 'return {\n      msg\n    }',
+      setupContains: 'return { msg }',
     });
   });
 
   it('should parse an empty vue file', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/empty');
     expectComponent(component);
   });
 
   it('should parse a vue file with empty blocks', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/empty');
     expectComponent(component);
   });
 
   it('should parse a simple vue file with default export', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/simple-exports-default').default;
     expectComponent(component, {
       name: 'SimpleExportsDefault',
@@ -73,7 +73,7 @@ describe('', () => {
   });
 
   it('should parse a simple vue file with exports', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/simple-exports');
     expectComponent(component, {
       name: 'SimpleExports',
@@ -82,25 +82,25 @@ describe('', () => {
   });
 
   it('should parse a vue file with template only', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/template-only');
     expectComponent(component, { renderContains: 'Template Only' });
   });
 
   it('should parse a vue file with script only', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/script-only');
     expectComponent(component, { name: 'ScriptOnly' });
   });
 
   it('should parse a vue file with template + empty script', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/template-empty-script');
     expectComponent(component, { renderContains: 'Template Empty Script' });
   });
 
   it('should parse a vue file with external sources', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/external-template-script-style');
     expectComponent(component, {
       name: 'ExternalTemplateScriptStyle',
@@ -109,7 +109,7 @@ describe('', () => {
   });
 
   it('should parse a functional vue component (template)', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/functional-template');
     expectFunctionalComponent(component, {
       name: 'FunctionalTemplate',
@@ -118,7 +118,7 @@ describe('', () => {
   });
 
   it('should parse a functional vue component (external template)', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/functional-external-template.vue');
     expectFunctionalComponent(component, {
       name: 'FunctionalExternalTemplate',
@@ -127,7 +127,7 @@ describe('', () => {
   });
 
   it('should parse a functional vue component (render)', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/functional-render');
     expectFunctionalComponent(component, {
       name: 'FunctionalRender',
@@ -137,7 +137,7 @@ describe('', () => {
   });
 
   it('should ignore template when render fn provided (normal)', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/render-fn-normal');
     expectComponent(component, {
       name: 'RenderFnNormal',
@@ -147,7 +147,7 @@ describe('', () => {
   });
 
   it('should ignore template when render fn provided (functional)', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/render-fn-functional');
     expectFunctionalComponent(component, {
       name: 'RenderFnFunctional',
@@ -157,7 +157,7 @@ describe('', () => {
   });
 
   it('should print error on console when parser error happens', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/error-parser');
     expect(log.error.calledTwice).to.equal(true);
     expect(log.error.firstCall.args[0]).to.match(
@@ -170,7 +170,7 @@ describe('', () => {
   });
 
   it('should print error on console when template has multiple root elements', function () {
-    require('../../..');
+    require('../../..')();
     const component = require('./fixtures/error-multi-root');
     expect(log.error.calledTwice).to.equal(true);
     expect(log.error.firstCall.args[0]).to.match(
